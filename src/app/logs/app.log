@@ -202,3 +202,71 @@ socket.gaierror: [Errno -2] Name or service not known
 2025-07-13 13:23:30,994 - arq.connections - WARNING - redis connection error redis:6379 TimeoutError Timeout connecting to server, 3 retries remaining...
 2025-07-13 13:23:33,013 - arq.connections - WARNING - redis connection error redis:6379 TimeoutError Timeout connecting to server, 2 retries remaining...
 2025-07-13 13:23:35,026 - arq.connections - WARNING - redis connection error redis:6379 TimeoutError Timeout connecting to server, 1 retries remaining...
+2025-07-13 21:48:28,001 - root - INFO - Fetched categories: 7
+2025-07-13 21:48:28,009 - root - INFO - Fetched questions: 24
+2025-07-13 21:48:28,012 - root - INFO - Fetched options: 78
+2025-07-13 21:48:28,478 - root - INFO - Fetched categories: 7
+2025-07-13 21:48:28,481 - root - INFO - Fetched questions: 24
+2025-07-13 21:48:28,483 - root - INFO - Fetched options: 78
+2025-07-13 21:48:28,497 - root - INFO - Fetched categories: 7
+2025-07-13 21:48:28,499 - root - INFO - Fetched questions: 24
+2025-07-13 21:48:28,501 - root - INFO - Fetched options: 78
+2025-07-13 21:50:00,103 - root - INFO - Fetched categories: 7
+2025-07-13 21:50:00,106 - root - INFO - Fetched questions: 24
+2025-07-13 21:50:00,110 - root - INFO - Fetched options: 78
+2025-07-13 21:57:50,972 - root - INFO - Fetched categories: 7
+2025-07-13 21:57:50,975 - root - INFO - Fetched questions: 24
+2025-07-13 21:57:50,978 - root - INFO - Fetched options: 78
+2025-07-13 21:59:01,143 - root - INFO - Fetched categories: 7
+2025-07-13 21:59:01,147 - root - INFO - Fetched questions: 24
+2025-07-13 21:59:01,152 - root - INFO - Fetched options: 78
+2025-07-13 21:59:47,973 - root - INFO - Fetched categories: 7
+2025-07-13 21:59:47,979 - root - INFO - Fetched questions: 24
+2025-07-13 21:59:47,985 - root - INFO - Fetched options: 78
+2025-07-13 22:08:04,066 - root - INFO - Fetched categories: 7
+2025-07-13 22:08:04,069 - root - INFO - Fetched questions: 24
+2025-07-13 22:08:04,073 - root - INFO - Fetched options: 78
+2025-07-13 22:09:07,076 - root - INFO - Fetched categories: 7
+2025-07-13 22:09:07,079 - root - INFO - Fetched questions: 24
+2025-07-13 22:09:07,083 - root - INFO - Fetched options: 78
+2025-07-13 22:09:07,084 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:12:31,779 - root - INFO - Fetched categories: 7
+2025-07-13 22:12:31,785 - root - INFO - Fetched questions: 24
+2025-07-13 22:12:31,792 - root - INFO - Fetched options: 78
+2025-07-13 22:12:31,794 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:12:31,821 - root - INFO - Fetched categories: 7
+2025-07-13 22:12:31,826 - root - INFO - Fetched questions: 24
+2025-07-13 22:12:31,833 - root - INFO - Fetched options: 78
+2025-07-13 22:12:31,835 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:12:52,693 - root - INFO - Fetched categories: 7
+2025-07-13 22:12:52,695 - root - INFO - Fetched questions: 24
+2025-07-13 22:12:52,698 - root - INFO - Fetched options: 78
+2025-07-13 22:12:52,700 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:12:52,708 - root - INFO - Fetched categories: 7
+2025-07-13 22:12:52,712 - root - INFO - Fetched questions: 24
+2025-07-13 22:12:52,715 - root - INFO - Fetched options: 78
+2025-07-13 22:12:52,717 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:13:30,745 - root - INFO - Fetched categories: 7
+2025-07-13 22:13:30,746 - root - INFO - Fetched questions: 24
+2025-07-13 22:13:30,747 - root - INFO - Fetched options: 78
+2025-07-13 22:13:30,750 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:13:52,709 - root - INFO - Fetched categories: 7
+2025-07-13 22:13:52,711 - root - INFO - Fetched questions: 24
+2025-07-13 22:13:52,712 - root - INFO - Fetched options: 78
+2025-07-13 22:13:52,713 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:14:56,674 - root - INFO - Fetched categories: 7
+2025-07-13 22:14:56,676 - root - INFO - Fetched questions: 24
+2025-07-13 22:14:56,679 - root - INFO - Fetched options: 78
+2025-07-13 22:14:56,680 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:14:56,690 - root - INFO - Fetched categories: 7
+2025-07-13 22:14:56,691 - root - INFO - Fetched questions: 24
+2025-07-13 22:14:56,694 - root - INFO - Fetched options: 78
+2025-07-13 22:14:56,695 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:32:32,084 - root - INFO - Fetched categories: 7
+2025-07-13 22:32:32,087 - root - INFO - Fetched questions: 24
+2025-07-13 22:32:32,093 - root - INFO - Fetched options: 78
+2025-07-13 22:32:32,095 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:43:51,157 - root - INFO - Fetched categories: 7
+2025-07-13 22:43:51,160 - root - INFO - Fetched questions: 24
+2025-07-13 22:43:51,166 - root - INFO - Fetched options: 78
+2025-07-13 22:43:51,168 - root - INFO - Returning 7 categories with nested questions and options

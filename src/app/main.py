@@ -33,6 +33,20 @@ async def lifespan_with_admin(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = create_application(router=router, settings=settings, lifespan=lifespan_with_admin)
 
+# Add CORS middleware to allow frontend access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",  # Customer frontend
+        "http://localhost:8080",  # Alternative frontend port
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8080",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Mount static files
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):

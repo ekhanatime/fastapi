@@ -11,10 +11,12 @@ from ...models.assessment import Assessment
 from ...models.question import Question
 from ...models.question_option import QuestionOption
 from ...models.category import Category
+from ...models.user_profile import UserProfile
 from ...schemas.assessment import (
     AssessmentStartRequest,
     AssessmentStartResponse,
     AssessmentSubmission,
+    SharedAssessmentSubmission,
     AssessmentResult,
     AssessmentResponse,
     CategoryScore
@@ -75,7 +77,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
     try:
         # Get all categories with questions
         categories_result = await db.execute(
-            select(Category).order_by(Category.name)
+            select(Category).order_by(Category.title)
         )
         categories = categories_result.scalars().all()
         
@@ -104,7 +106,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
                         {
                             "id": opt.id,
                             "value": opt.option_value,
-                            "label": opt.option_label
+                            "label": opt.option_text
                         } for opt in options
                     ]
                 }
@@ -112,7 +114,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
             
             category_data = {
                 "id": category.id,
-                "name": category.name,
+                "name": category.title,
                 "description": category.description,
                 "questions": category_questions
             }
@@ -358,6 +360,156 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
         insights=f"Your overall security score is {percentage_score:.1f}%. Focus on improving areas with lower scores.",
         completed_at=assessment.completed_at,
         share_token=share_token
+    )
+
+
+@router.post("/submit-shared", response_model=AssessmentResult)
+async def submit_shared_assessment(
+    submission: SharedAssessmentSubmission, 
+    db: Annotated[AsyncSession, Depends(async_get_db)]
+):
+    """
+    Submit assessment answers via shared company link.
+    The assessment will be attributed to the customer who generated the sharing token.
+    """
+    # First, find the user who owns this company token
+    # For now, we'll use the share_token field in assessments table
+    result = await db.execute(
+        select(Assessment).where(Assessment.share_token == submission.company_token)
+    )
+    owner_assessment = result.scalar_one_or_none()
+    if not owner_assessment:
+        raise HTTPException(status_code=404, detail="Invalid sharing token")
+    
+    # Get the user profile of the token owner
+    user_result = await db.execute(
+        select(UserProfile).where(UserProfile.id == owner_assessment.user_profile_id)
+    )
+    owner_user = user_result.scalar_one_or_none()
+    if not owner_user:
+        raise HTTPException(status_code=404, detail="Token owner not found")
+    
+    # Create a new assessment for this shared submission
+    new_assessment = Assessment(
+        id=uuid.uuid4(),
+        user_profile_id=owner_user.id,  # Attribute to the token owner
+        status="in_progress",
+        share_token=submission.company_token,  # Keep reference to original token
+        created_at=datetime.utcnow()
+    )
+    
+    db.add(new_assessment)
+    await db.flush()  # Get the ID
+    
+    # Store answers
+    answers_data = {}
+    for answer in submission.answers:
+        answers_data[str(answer.question_id)] = {
+            "selected_options": answer.selected_options,
+            "text_answer": answer.text_answer
+        }
+    
+    new_assessment.answers = answers_data
+    new_assessment.status = "completed"
+    new_assessment.completed_at = datetime.utcnow()
+    
+    # Calculate scores (same logic as regular submission)
+    total_score = 0.0
+    max_possible_score = 0.0
+    category_scores_data = {}
+    
+    # Get all questions and their options
+    questions_result = await db.execute(select(Question).where(Question.is_active == True))
+    questions = questions_result.scalars().all()
+    
+    for question in questions:
+        question_score = 0.0
+        max_question_score = question.weight
+        
+        if str(question.id) in answers_data:
+            answer_data = answers_data[str(question.id)]
+            selected_option_ids = answer_data.get("selected_options", [])
+            
+            # Calculate score based on selected options
+            for option_id in selected_option_ids:
+                option_result = await db.execute(select(QuestionOption).where(QuestionOption.id == option_id))
+                option = option_result.scalar_one_or_none()
+                if option:
+                    question_score += option.score_points
+        
+        # Add to category scores
+        if question.category_id not in category_scores_data:
+            category_scores_data[question.category_id] = {
+                "score": 0.0,
+                "max_score": 0.0
+            }
+        
+        category_scores_data[question.category_id]["score"] += question_score
+        category_scores_data[question.category_id]["max_score"] += max_question_score
+        
+        total_score += question_score
+        max_possible_score += max_question_score
+    
+    # Calculate percentage and risk level
+    percentage_score = (total_score / max_possible_score * 100) if max_possible_score > 0 else 0
+    
+    if percentage_score >= 80:
+        risk_level = "Low"
+    elif percentage_score >= 60:
+        risk_level = "Medium"
+    elif percentage_score >= 40:
+        risk_level = "High"
+    else:
+        risk_level = "Critical"
+    
+    new_assessment.total_score = total_score
+    new_assessment.percentage_score = percentage_score
+    new_assessment.risk_level = risk_level
+    new_assessment.category_scores = category_scores_data
+    
+    # Create category scores list for response
+    category_scores_list = []
+    categories_result = await db.execute(select(Category))
+    categories = categories_result.scalars().all()
+    
+    for category in categories:
+        if category.id in category_scores_data:
+            score_data = category_scores_data[category.id]
+            category_percentage = (score_data["score"] / score_data["max_score"] * 100) if score_data["max_score"] > 0 else 0
+            
+            if category_percentage >= 80:
+                cat_risk_level = "Low"
+            elif category_percentage >= 60:
+                cat_risk_level = "Medium"
+            elif category_percentage >= 40:
+                cat_risk_level = "High"
+            else:
+                cat_risk_level = "Critical"
+            
+            category_scores_list.append(CategoryScore(
+                category_id=str(category.id),
+                category_title=category.title,
+                score=score_data["score"],
+                max_score=score_data["max_score"],
+                percentage=category_percentage,
+                risk_level=cat_risk_level
+            ))
+    
+    await db.commit()
+    
+    return AssessmentResult(
+        assessment_id=new_assessment.id,
+        user_profile_id=new_assessment.user_profile_id,
+        status=new_assessment.status,
+        total_score=total_score,
+        max_possible_score=max_possible_score,
+        percentage_score=percentage_score,
+        risk_level=risk_level,
+        category_scores=category_scores_list,
+        recommendations=new_assessment.recommendations or [],
+        insights=new_assessment.insights,
+        completed_at=new_assessment.completed_at,
+        share_token=new_assessment.share_token
     )
 
 

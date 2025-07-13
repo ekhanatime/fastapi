@@ -19,6 +19,14 @@ class AssessmentSubmission(BaseModel):
     answers: List[AnswerSubmission] = Field(..., description="List of answers")
 
 
+class SharedAssessmentSubmission(BaseModel):
+    company_token: str = Field(..., description="Company sharing token")
+    answers: List[AnswerSubmission] = Field(..., description="List of answers")
+    submission_ip: Optional[str] = Field(None, description="IP address of submission")
+    user_agent: Optional[str] = Field(None, description="User agent string")
+    browser_fingerprint: Optional[str] = Field(None, description="Browser fingerprint for duplicate detection")
+
+
 class CategoryScore(BaseModel):
     category_id: str
     category_title: str

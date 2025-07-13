@@ -14,6 +14,8 @@ from .categories import router as categories_router
 from .questions import router as questions_router
 from .question_options import router as question_options_router
 from .leads import router as leads_router
+from .lead_capture import router as lead_capture_router
+from .password import router as password_router
 from .assessments import router as assessments_router
 
 # New comprehensive endpoints from migration file analysis
@@ -50,6 +52,8 @@ router.include_router(categories_router, prefix="/categories", tags=["categories
 router.include_router(questions_router, prefix="/questions", tags=["questions"])
 router.include_router(question_options_router, prefix="/question-options", tags=["question-options"])
 router.include_router(leads_router, prefix="/leads", tags=["leads"])
+router.include_router(lead_capture_router, prefix="/lead-capture", tags=["lead-capture"])
+router.include_router(password_router, prefix="/password", tags=["password"])
 
 # Register new comprehensive endpoints
 router.include_router(user_answers_router, prefix="/user-answers", tags=["user-answers"])

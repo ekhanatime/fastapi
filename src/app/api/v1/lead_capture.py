@@ -1,113 +1,104 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from typing import Annotated
-
-from app.core.database import async_get_db
-from app.models.user import User
-from app.models.user_profile import UserProfile
-from app.schemas.user_profile import LeadCaptureRequest, LeadCaptureResponse
-from app.schemas.user import UserCreate, UserCreateInternal
-from app.core.security import get_password_hash
-from app.crud.crud_users import crud_users
 import secrets
 import string
+
+from ...core.db.database import async_get_db
+from ...models.user import User
+from ...schemas.lead_capture import LeadCaptureRequest, LeadCaptureResponse
+from ...core.security import get_password_hash
 
 router = APIRouter()
 
 
+def generate_temporary_password(length: int = 12) -> str:
+    """Generate a secure temporary password."""
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
 @router.post("/capture-lead", response_model=LeadCaptureResponse)
 async def capture_lead(
-    lead_data: LeadCaptureRequest, 
+    lead_data: LeadCaptureRequest,
     db: Annotated[AsyncSession, Depends(async_get_db)]
 ):
-    """
-    Capture lead information and create user account if needed.
-    Works with existing authentication system.
-    """
-    # Check if user already exists
-    existing_user = await crud_users.get(db=db, email=lead_data.email, is_deleted=False)
-    
-    if existing_user:
-        # User exists, get or create their profile
-        user_id = existing_user["id"]
-        
-        # Check if profile exists
+    """Capture lead information and create user account with temporary password."""
+    try:
+        # Check if user already exists
         result = await db.execute(
-            select(UserProfile).where(UserProfile.user_id == user_id)
+            select(User).where(User.email == lead_data.email)
         )
-        profile = result.scalar_one_or_none()
+        existing_user = result.scalar_one_or_none()
         
-        if profile:
-            # Update existing profile with new information
-            if lead_data.full_name and not profile.full_name:
-                profile.full_name = lead_data.full_name
-            if lead_data.company_name and not profile.company_name:
-                profile.company_name = lead_data.company_name
-            if lead_data.job_title and not profile.job_title:
-                profile.job_title = lead_data.job_title
-            if lead_data.phone and not profile.phone:
-                profile.phone = lead_data.phone
-            if lead_data.company_size and not profile.company_size:
-                profile.company_size = lead_data.company_size
-            if lead_data.industry and not profile.industry:
-                profile.industry = lead_data.industry
-            if lead_data.lead_source and not profile.lead_source:
-                profile.lead_source = lead_data.lead_source
-            
-            await db.commit()
-            await db.refresh(profile)
-        else:
-            # Create new profile for existing user
-            profile_data = lead_data.dict(exclude={"email"})
-            profile_data["user_id"] = user_id
-            profile = UserProfile(**profile_data)
-            db.add(profile)
-            await db.commit()
-            await db.refresh(profile)
+        if existing_user:
+            return LeadCaptureResponse(
+                success=True,
+                message="Welcome back! You can proceed with the assessment.",
+                user_id=str(existing_user.id),
+                is_existing_user=True,
+                requires_password_change=False
+            )
         
-        message = "Welcome back! You can continue taking assessments."
-        registration_required = False
+        # Generate temporary password
+        temp_password = generate_temporary_password()
+        hashed_password = get_password_hash(temp_password)
         
-    else:
         # Create new user with temporary password
-        temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+        new_user = User()
+        new_user.email = lead_data.email
+        new_user.hashed_password = hashed_password
+        new_user.lead_status = "new"
+        new_user.subscription_tier = "free"
+        new_user.assessments_count = 0
+        new_user.max_assessments = 3
         
-        # Extract name from email if full_name not provided
-        display_name = lead_data.full_name or lead_data.email.split('@')[0]
-        username = lead_data.email.split('@')[0].lower()[:20]  # Ensure username length limit
+        db.add(new_user)
         
-        # Create user via existing CRUD
-        user_create = UserCreateInternal(
-            name=display_name,
-            username=username,
-            email=lead_data.email,
-            hashed_password=get_password_hash(temp_password)
+        try:
+            await db.commit()
+            await db.refresh(new_user)
+            
+            return LeadCaptureResponse(
+                success=True,
+                message="Account created! Please save your temporary password and proceed with the assessment.",
+                user_id=str(new_user.id),
+                is_existing_user=False,
+                temporary_password=temp_password,
+                requires_password_change=True
+            )
+        except IntegrityError:
+            # Handle race condition - user was created between our check and insert
+            await db.rollback()
+            
+            # Fetch the existing user that was created by another request
+            result = await db.execute(
+                select(User).where(User.email == lead_data.email)
+            )
+            existing_user = result.scalar_one_or_none()
+            
+            if existing_user:
+                return LeadCaptureResponse(
+                    success=True,
+                    message="Welcome back! You can proceed with the assessment.",
+                    user_id=str(existing_user.id),
+                    is_existing_user=True,
+                    requires_password_change=False
+                )
+            else:
+                # This should never happen, but just in case
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to create or retrieve user account"
+                )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create account: {str(e)}"
         )
-        
-        created_user = await crud_users.create(db=db, object=user_create)
-        user_id = created_user.id
-        
-        # Create user profile
-        profile_data = lead_data.dict(exclude={"email"})
-        profile_data["user_id"] = user_id
-        profile = UserProfile(**profile_data)
-        db.add(profile)
-        await db.commit()
-        await db.refresh(profile)
-        
-        message = "Thank you for your interest! You can now take your security assessment."
-        registration_required = True  # They'll need to set a proper password later
-    
-    # Check assessment limits
-    can_take_assessment = profile.assessments_count < profile.max_assessments
-    assessments_remaining = max(0, profile.max_assessments - profile.assessments_count)
-    
-    return LeadCaptureResponse(
-        message=message,
-        user_id=user_id,
-        profile_id=profile.id,
-        can_take_assessment=can_take_assessment,
-        assessments_remaining=assessments_remaining,
-        registration_required=registration_required
-    )
