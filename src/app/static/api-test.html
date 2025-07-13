@@ -422,9 +422,21 @@
                         <span class="method-badge method-post">POST</span>
                         Submit Assessment
                     </div>
+                    <div class="endpoint-item" data-endpoint="assessment-start">
+                        <span class="method-badge method-post">POST</span>
+                        Start Assessment
+                    </div>
+                    <div class="endpoint-item" data-endpoint="assessment-info">
+                        <span class="method-badge method-get">GET</span>
+                        Get Assessment Info
+                    </div>
                     <div class="endpoint-item" data-endpoint="assessment-data">
                         <span class="method-badge method-get">GET</span>
                         Get Assessment Data
+                    </div>
+                    <div class="endpoint-item" data-endpoint="assessment-results">
+                        <span class="method-badge method-get">GET</span>
+                        Get Assessment Results
                     </div>
                 </div>
 
@@ -510,9 +522,43 @@
                 <!-- Assessment Data Endpoint -->
                 <div class="endpoint-details" id="assessment-data">
                     <h2 class="endpoint-title">📋 Get Assessment Structure</h2>
-                    <p><strong>GET</strong> <code>/api/v1/assessment</code></p>
+                    <p><strong>GET</strong> <code>/api/v1/assessment/data/full</code></p>
                     
                     <button class="btn btn-primary" onclick="getAssessmentData()">Get Assessment Data</button>
+                </div>
+
+                <!-- Assessment Start Endpoint -->
+                <div class="endpoint-details" id="assessment-start">
+                    <h2 class="endpoint-title">🚀 Start Assessment</h2>
+                    <p><strong>POST</strong> <code>/api/v1/assessment/start</code></p>
+                    
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" class="form-control" id="start-email" placeholder="user@example.com" required>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="startAssessment()">Start Assessment</button>
+                </div>
+
+                <!-- Assessment Info Endpoint -->
+                <div class="endpoint-details" id="assessment-info">
+                    <h2 class="endpoint-title">ℹ️ Get Assessment Info</h2>
+                    <p><strong>GET</strong> <code>/api/v1/assessment</code></p>
+                    
+                    <button class="btn btn-primary" onclick="getAssessmentInfo()">Get Assessment Info</button>
+                </div>
+
+                <!-- Assessment Results Endpoint -->
+                <div class="endpoint-details" id="assessment-results">
+                    <h2 class="endpoint-title">📊 Get Assessment Results</h2>
+                    <p><strong>GET</strong> <code>/api/v1/assessment/results/{id}</code></p>
+                    
+                    <div class="form-group">
+                        <label>Assessment ID</label>
+                        <input type="text" class="form-control" id="results-id" placeholder="assessment-uuid" required>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="getAssessmentResults()">Get Results</button>
                 </div>
 
                 <!-- Admin Login Endpoint -->
@@ -654,10 +700,16 @@
                 updateStatus('api', false, 'Offline');
             }
 
-            // Check Database (through API)
+            // Check Database (through health endpoint)
             try {
-                const response = await fetch('/api/v1/assessment/data/full');
-                updateStatus('db', response.ok, response.ok ? 'Connected' : 'Error');
+                const response = await fetch('/api/v1/health/detailed');
+                if (response.ok) {
+                    const healthData = await response.json();
+                    const dbConnected = healthData.database && healthData.database.status === 'connected';
+                    updateStatus('db', dbConnected, dbConnected ? 'Connected' : 'Error');
+                } else {
+                    updateStatus('db', false, 'Error');
+                }
             } catch (error) {
                 updateStatus('db', false, 'Disconnected');
             }
@@ -764,9 +816,40 @@
         async function getAssessmentData() {
             showModal('<div class="loading"></div><p>Fetching assessment data...</p>');
             
-            const result = await makeRequest('GET', '/api/v1/assessment');
+            await makeRequest('GET', '/api/v1/assessment/data/full');
             
             document.getElementById('statusModal').style.display = 'none';
+        }
+
+        async function getAssessmentDataFull() {
+            await makeRequest('GET', '/api/v1/assessment/data/full');
+        }
+
+        async function startAssessment() {
+            const email = document.getElementById('start-email').value;
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            const data = { email };
+            await makeRequest('POST', '/api/v1/assessment/start', data);
+        }
+
+        async function getAssessmentInfo() {
+            await makeRequest('GET', '/api/v1/assessment');
+        }
+
+        async function getAssessmentResults() {
+            const assessmentId = document.getElementById('results-id').value;
+            
+            if (!assessmentId) {
+                alert('Please enter an assessment ID');
+                return;
+            }
+            
+            await makeRequest('GET', `/api/v1/assessment/results/${assessmentId}`);
         }
 
         async function adminLogin() {
