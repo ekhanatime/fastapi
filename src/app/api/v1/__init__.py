@@ -17,6 +17,7 @@ from .leads import router as leads_router
 from .lead_capture import router as lead_capture_router
 from .password import router as password_router
 from .assessments import router as assessments_router
+from .email import router as email_router
 
 # New comprehensive endpoints from migration file analysis
 from .user_answers import router as user_answers_router
@@ -54,6 +55,7 @@ router.include_router(question_options_router, prefix="/question-options", tags=
 router.include_router(leads_router, prefix="/leads", tags=["leads"])
 router.include_router(lead_capture_router, prefix="/lead-capture", tags=["lead-capture"])
 router.include_router(password_router, prefix="/password", tags=["password"])
+router.include_router(email_router, prefix="/email", tags=["email"])
 
 # Register new comprehensive endpoints
 router.include_router(user_answers_router, prefix="/user-answers", tags=["user-answers"])

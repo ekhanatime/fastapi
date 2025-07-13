@@ -270,3 +270,21 @@ socket.gaierror: [Errno -2] Name or service not known
 2025-07-13 22:43:51,160 - root - INFO - Fetched questions: 24
 2025-07-13 22:43:51,166 - root - INFO - Fetched options: 78
 2025-07-13 22:43:51,168 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:50:37,096 - root - INFO - Fetched categories: 7
+2025-07-13 22:50:37,099 - root - INFO - Fetched questions: 24
+2025-07-13 22:50:37,102 - root - INFO - Fetched options: 78
+2025-07-13 22:50:37,103 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:50:37,104 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-13 22:50:37,105 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-13 22:51:16,299 - root - INFO - Fetched categories: 7
+2025-07-13 22:51:16,300 - root - INFO - Fetched questions: 24
+2025-07-13 22:51:16,302 - root - INFO - Fetched options: 78
+2025-07-13 22:51:16,303 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:51:16,303 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-13 22:51:16,304 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-13 22:51:16,327 - root - INFO - Fetched categories: 7
+2025-07-13 22:51:16,331 - root - INFO - Fetched questions: 24
+2025-07-13 22:51:16,335 - root - INFO - Fetched options: 78
+2025-07-13 22:51:16,336 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 22:51:16,337 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-13 22:51:16,338 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...

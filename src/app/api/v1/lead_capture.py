@@ -33,12 +33,15 @@ async def capture_lead(
         existing_user = result.scalar_one_or_none()
         
         if existing_user:
+            # For existing users, allow them to take new assessments without forcing login
+            # Only show login modal if they explicitly want to access their dashboard/history
             return LeadCaptureResponse(
                 success=True,
-                message="Welcome back! You can proceed with the assessment.",
+                message="Account found! You can take a new assessment or login to view your history.",
                 user_id=str(existing_user.id),
-                is_existing_user=True,
-                requires_password_change=False
+                is_existing_user=False,  # Changed to False to allow direct assessment taking
+                requires_password_change=False,
+                show_login_option=True  # New field to show optional login button
             )
         
         # Generate temporary password

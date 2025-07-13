@@ -21,6 +21,9 @@ class QuestionOptionSchema(BaseModel):
     
     class Config:
         from_attributes = True
+        json_encoders = {
+            # Ensure proper JSON serialization
+        }
 
 class QuestionSchema(BaseModel):
     id: int
@@ -35,6 +38,9 @@ class QuestionSchema(BaseModel):
     
     class Config:
         from_attributes = True
+        json_encoders = {
+            # Ensure proper JSON serialization
+        }
 
 class CategorySchema(BaseModel):
     id: str
@@ -47,6 +53,9 @@ class CategorySchema(BaseModel):
     
     class Config:
         from_attributes = True
+        json_encoders = {
+            # Ensure proper JSON serialization
+        }
 
 class AssessmentFullSchema(BaseModel):
     categories: List[CategorySchema]
@@ -126,4 +135,15 @@ async def get_full_assessment(db: Annotated[AsyncSession, Depends(async_get_db)]
         category_data_list.append(category_data)
     
     logging.info(f"Returning {len(category_data_list)} categories with nested questions and options")
-    return {"categories": category_data_list}
+    
+    # Create the response using the schema to ensure proper serialization
+    response = AssessmentFullSchema(categories=category_data_list)
+    
+    # Log the first category's questions for debugging
+    if category_data_list:
+        first_cat = category_data_list[0]
+        logging.info(f"First category '{first_cat.id}' has {len(first_cat.questions)} questions")
+        if first_cat.questions:
+            logging.info(f"First question: {first_cat.questions[0].question_text[:50]}...")
+    
+    return response

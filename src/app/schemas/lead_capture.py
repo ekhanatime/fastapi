@@ -15,3 +15,4 @@ class LeadCaptureResponse(BaseModel):
     is_existing_user: bool = False
     temporary_password: Optional[str] = None
     requires_password_change: bool = False
+    show_login_option: bool = False
