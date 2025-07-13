@@ -1,28 +1,74 @@
-import uuid as uuid_pkg
-from datetime import UTC, datetime
-
-from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Index
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from ..core.db.database import Base
+import uuid
+from enum import Enum
+
+
+class SubscriptionTier(str, Enum):
+    FREE = "free"
+    BASIC = "basic"
+    PREMIUM = "premium"
+
+
+class LeadStatus(str, Enum):
+    NEW = "new"
+    CONTACTED = "contacted"
+    QUALIFIED = "qualified"
+    CUSTOMER = "customer"
+
+
+class CompanySize(str, Enum):
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
 
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=True)  # Nullable for leads
+    full_name = Column(String(255), nullable=True)
+    company_name = Column(String(255), nullable=True)
+    job_title = Column(String(255), nullable=True)
+    phone = Column(String(50), nullable=True)
+    company_size = Column(String(20), nullable=True)  # Will be enum in production
+    industry = Column(String(100), nullable=True)
+    
+    # Subscription info
+    subscription_tier = Column(String(20), default="free")  # Will be enum in production
+    assessments_count = Column(Integer, default=0)
+    max_assessments = Column(Integer, default=3)
+    
+    # Lead tracking
+    lead_status = Column(String(20), default="new")  # Will be enum in production
+    lead_source = Column(String(100), nullable=True)
+    lead_notes = Column(Text, nullable=True)
+    
+    # Company sharing
+    company_share_token = Column(String(255), nullable=True, unique=True)
+    company_share_enabled = Column(Boolean, default=False)
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    last_login = Column(DateTime(timezone=True), nullable=True)
+    
+    # Relationships
+    # Note: Assessments are linked via UserProfile, not directly to User
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_users_email', 'email'),
+        Index('idx_users_company', 'company_name'),
+        Index('idx_users_lead_status', 'lead_status'),
+        Index('idx_users_subscription', 'subscription_tier'),
+        Index('idx_users_created_at', 'created_at'),
+    )
 
-    id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
-
-    name: Mapped[str] = mapped_column(String(30))
-    username: Mapped[str] = mapped_column(String(20), unique=True, index=True)
-    email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
-    hashed_password: Mapped[str] = mapped_column(String)
-
-    profile_image_url: Mapped[str] = mapped_column(String, default="https://profileimageurl.com")
-    uuid: Mapped[uuid_pkg.UUID] = mapped_column(default_factory=uuid_pkg.uuid4, primary_key=True, unique=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: datetime.now(UTC))
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    is_deleted: Mapped[bool] = mapped_column(default=False, index=True)
-    is_superuser: Mapped[bool] = mapped_column(default=False)
-
-    tier_id: Mapped[int | None] = mapped_column(ForeignKey("tier.id"), index=True, default=None, init=False)
+    def __repr__(self):
+        return f"<User(id={self.id}, email='{self.email}', lead_status='{self.lead_status}')>"

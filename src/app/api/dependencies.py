@@ -72,6 +72,15 @@ async def get_current_superuser(current_user: Annotated[dict, Depends(get_curren
     return current_user
 
 
+# Alias for admin authentication
+async def get_current_admin_user(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+    """Admin authentication dependency - alias for get_current_superuser"""
+    if not current_user["is_superuser"]:
+        raise ForbiddenException("Admin privileges required.")
+
+    return current_user
+
+
 async def rate_limiter_dependency(
     request: Request, db: Annotated[AsyncSession, Depends(async_get_db)], user: dict | None = Depends(get_optional_user)
 ) -> None:

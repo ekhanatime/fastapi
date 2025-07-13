@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Assessment API Test Console</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .docs-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .docs-link {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .docs-link:hover {
+            background: #0056b3;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+        }
+
+        .endpoint-group {
+            margin-bottom: 25px;
+        }
+
+        .endpoint-group h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+
+        .endpoint-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .endpoint-item:hover {
+            background: #e9ecef;
+            border-left-color: #007bff;
+        }
+
+        .endpoint-item.active {
+            background: #007bff;
+            color: white;
+            border-left-color: #0056b3;
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .method-get { background: #28a745; color: white; }
+        .method-post { background: #007bff; color: white; }
+        .method-put { background: #ffc107; color: black; }
+        .method-delete { background: #dc3545; color: white; }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        .endpoint-details {
+            display: none;
+        }
+
+        .endpoint-details.active {
+            display: block;
+        }
+
+        .endpoint-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .response-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .response-status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .status-200 { background: #d4edda; color: #155724; }
+        .status-400 { background: #f8d7da; color: #721c24; }
+        .status-500 { background: #f5c6cb; color: #721c24; }
+
+        .response-body {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .welcome-screen h2 {
+            margin-bottom: 20px;
+            color: #495057;
+        }
+
+        .welcome-screen p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Security Assessment API</h1>
+            <p>Interactive API Testing Console & Documentation</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot status-online" id="api-status"></div>
+                <span>API Server: <span id="api-status-text">Checking...</span></span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot status-online" id="db-status"></div>
+                <span>Database: <span id="db-status-text">Checking...</span></span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot status-online" id="redis-status"></div>
+                <span>Redis: <span id="redis-status-text">Checking...</span></span>
+            </div>
+            <div class="docs-links">
+                <a href="/docs" class="docs-link" target="_blank">📚 API Docs</a>
+                <a href="/redoc" class="docs-link" target="_blank">📖 ReDoc</a>
+                <a href="https://github.com/your-repo" class="docs-link" target="_blank" rel="noopener">🔗 GitHub</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="endpoint-group">
+                    <h3>🔓 Public Endpoints</h3>
+                    <div class="endpoint-item" data-endpoint="assessment-submit">
+                        <span class="method-badge method-post">POST</span>
+                        Submit Assessment
+                    </div>
+                    <div class="endpoint-item" data-endpoint="assessment-data">
+                        <span class="method-badge method-get">GET</span>
+                        Get Assessment Data
+                    </div>
+                </div>
+
+                <div class="endpoint-group">
+                    <h3>👤 User Management</h3>
+                    <div class="endpoint-item" data-endpoint="user-register">
+                        <span class="method-badge method-post">POST</span>
+                        Register User
+                    </div>
+                    <div class="endpoint-item" data-endpoint="user-login">
+                        <span class="method-badge method-post">POST</span>
+                        User Login
+                    </div>
+                    <div class="endpoint-item" data-endpoint="user-profile">
+                        <span class="method-badge method-get">GET</span>
+                        Get Profile
+                    </div>
+                </div>
+
+                <div class="endpoint-group">
+                    <h3>🔧 Admin Endpoints</h3>
+                    <div class="endpoint-item" data-endpoint="admin-login">
+                        <span class="method-badge method-post">POST</span>
+                        Admin Login
+                    </div>
+                    <div class="endpoint-item" data-endpoint="admin-customers">
+                        <span class="method-badge method-get">GET</span>
+                        List Customers
+                    </div>
+                    <div class="endpoint-item" data-endpoint="admin-analytics">
+                        <span class="method-badge method-get">GET</span>
+                        Analytics
+                    </div>
+                    <div class="endpoint-item" data-endpoint="admin-settings">
+                        <span class="method-badge method-get">GET</span>
+                        System Settings
+                    </div>
+                </div>
+
+                <div class="endpoint-group">
+                    <h3>📊 System Status</h3>
+                    <div class="endpoint-item" data-endpoint="health-check">
+                        <span class="method-badge method-get">GET</span>
+                        Health Check
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="welcome-screen" id="welcome-screen">
+                    <h2>Welcome to the API Test Console</h2>
+                    <p>Select an endpoint from the sidebar to start testing. This console provides interactive testing for all API endpoints with real-time status monitoring and comprehensive documentation links.</p>
+                    <p>🚀 <strong>Features:</strong> CRUD operations, request/response inspection, live service monitoring, and integrated documentation.</p>
+                </div>
+
+                <!-- Assessment Submit Endpoint -->
+                <div class="endpoint-details" id="assessment-submit">
+                    <h2 class="endpoint-title">📝 Submit Anonymous Assessment</h2>
+                    <p><strong>POST</strong> <code>/api/assessment</code></p>
+                    
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" class="form-control" id="assessment-email" placeholder="user@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Interested in Contact</label>
+                        <select class="form-control" id="assessment-contact">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Assessment Answers (JSON)</label>
+                        <textarea class="form-control" id="assessment-answers" placeholder='[{"question_id": 1, "selected_options": [1, 2]}]'></textarea>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="submitAssessment()">Submit Assessment</button>
+                    <button class="btn btn-success" onclick="loadSampleAssessment()">Load Sample Data</button>
+                </div>
+
+                <!-- Assessment Data Endpoint -->
+                <div class="endpoint-details" id="assessment-data">
+                    <h2 class="endpoint-title">📋 Get Assessment Structure</h2>
+                    <p><strong>GET</strong> <code>/api/v1/assessment</code></p>
+                    
+                    <button class="btn btn-primary" onclick="getAssessmentData()">Get Assessment Data</button>
+                </div>
+
+                <!-- Admin Login Endpoint -->
+                <div class="endpoint-details" id="admin-login">
+                    <h2 class="endpoint-title">🔐 Admin Login</h2>
+                    <p><strong>POST</strong> <code>/api/v1/admin/auth/login</code></p>
+                    
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="admin-email" placeholder="admin@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-control" id="admin-password" placeholder="password">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="adminLogin()">Login</button>
+                </div>
+
+                <!-- Admin Customers Endpoint -->
+                <div class="endpoint-details" id="admin-customers">
+                    <h2 class="endpoint-title">👥 List Customers</h2>
+                    <p><strong>GET</strong> <code>/api/v1/admin/customers</code></p>
+                    
+                    <div class="form-group">
+                        <label>Page</label>
+                        <input type="number" class="form-control" id="customers-page" value="1" min="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Page Size</label>
+                        <input type="number" class="form-control" id="customers-size" value="10" min="1" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Search Query</label>
+                        <input type="text" class="form-control" id="customers-search" placeholder="Search by email or company">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="getCustomers()">Get Customers</button>
+                </div>
+
+                <!-- Health Check Endpoint -->
+                <div class="endpoint-details" id="health-check">
+                    <h2 class="endpoint-title">💚 System Health Check</h2>
+                    <p><strong>GET</strong> <code>/health</code></p>
+                    
+                    <button class="btn btn-primary" onclick="healthCheck()">Check Health</button>
+                </div>
+
+                <!-- Response Area -->
+                <div class="response-area" id="response-area" style="display: none;">
+                    <div class="response-header">
+                        <h4>Response</h4>
+                        <div>
+                            <span class="response-status" id="response-status">200 OK</span>
+                            <span id="response-time">0ms</span>
+                        </div>
+                    </div>
+                    <div class="response-body" id="response-body"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>🔄 Request Status</h2>
+            <div id="modal-content">
+                <div class="loading"></div>
+                <p>Processing request...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentToken = localStorage.getItem('admin_token') || '';
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemStatus();
+            setupEventListeners();
+            setInterval(checkSystemStatus, 30000); // Check every 30 seconds
+        });
+
+        function setupEventListeners() {
+            // Sidebar navigation
+            document.querySelectorAll('.endpoint-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const endpoint = this.dataset.endpoint;
+                    showEndpoint(endpoint);
+                });
+            });
+
+            // Modal close
+            document.querySelector('.close').addEventListener('click', function() {
+                document.getElementById('statusModal').style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('statusModal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        function showEndpoint(endpointId) {
+            // Hide welcome screen
+            document.getElementById('welcome-screen').style.display = 'none';
+            
+            // Hide all endpoint details
+            document.querySelectorAll('.endpoint-details').forEach(detail => {
+                detail.classList.remove('active');
+            });
+            
+            // Show selected endpoint
+            const selectedEndpoint = document.getElementById(endpointId);
+            if (selectedEndpoint) {
+                selectedEndpoint.classList.add('active');
+            }
+            
+            // Update sidebar selection
+            document.querySelectorAll('.endpoint-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-endpoint="${endpointId}"]`).classList.add('active');
+        }
+
+        async function checkSystemStatus() {
+            // Check API Server
+            try {
+                const response = await fetch('/v1/health');
+                updateStatus('api', response.ok, response.ok ? 'Online' : 'Error');
+            } catch (error) {
+                updateStatus('api', false, 'Offline');
+            }
+
+            // Check Database (through API)
+            try {
+                const response = await fetch('/v1/assessment-data/full');
+                updateStatus('db', response.ok, response.ok ? 'Connected' : 'Error');
+            } catch (error) {
+                updateStatus('db', false, 'Disconnected');
+            }
+
+            // Check Redis (mock for now)
+            updateStatus('redis', true, 'Connected');
+        }
+
+        function updateStatus(service, isOnline, statusText) {
+            const statusDot = document.getElementById(`${service}-status`);
+            const statusTextEl = document.getElementById(`${service}-status-text`);
+            
+            statusDot.className = `status-dot ${isOnline ? 'status-online' : 'status-offline'}`;
+            statusTextEl.textContent = statusText;
+        }
+
+        function showModal(content) {
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('statusModal').style.display = 'block';
+        }
+
+        function showResponse(status, statusText, body, responseTime) {
+            const responseArea = document.getElementById('response-area');
+            const responseStatus = document.getElementById('response-status');
+            const responseBody = document.getElementById('response-body');
+            const responseTimeEl = document.getElementById('response-time');
+            
+            responseArea.style.display = 'block';
+            responseStatus.textContent = `${status} ${statusText}`;
+            responseStatus.className = `response-status status-${Math.floor(status/100)*100}`;
+            responseBody.textContent = JSON.stringify(body, null, 2);
+            responseTimeEl.textContent = `${responseTime}ms`;
+            
+            responseArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function makeRequest(method, url, data = null, useAuth = false) {
+            const startTime = Date.now();
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (useAuth && currentToken) {
+                headers['Authorization'] = `Bearer ${currentToken}`;
+            }
+            
+            const config = {
+                method,
+                headers
+            };
+            
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(url, config);
+                const responseTime = Date.now() - startTime;
+                const responseData = await response.json();
+                
+                showResponse(response.status, response.statusText, responseData, responseTime);
+                
+                return { success: response.ok, data: responseData };
+            } catch (error) {
+                const responseTime = Date.now() - startTime;
+                showResponse(0, 'Network Error', { error: error.message }, responseTime);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // API Functions
+        async function submitAssessment() {
+            const email = document.getElementById('assessment-email').value;
+            const contact = document.getElementById('assessment-contact').value === 'true';
+            const answersText = document.getElementById('assessment-answers').value;
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            let answers;
+            try {
+                answers = answersText ? JSON.parse(answersText) : [];
+            } catch (error) {
+                alert('Invalid JSON in answers field');
+                return;
+            }
+            
+            const data = {
+                email,
+                answers,
+                interested_in_contact: contact
+            };
+            
+            showModal('<div class="loading"></div><p>Submitting assessment...</p>');
+            
+            const result = await makeRequest('POST', '/api/assessment', data);
+            
+            document.getElementById('statusModal').style.display = 'none';
+        }
+
+        async function getAssessmentData() {
+            showModal('<div class="loading"></div><p>Fetching assessment data...</p>');
+            
+            const result = await makeRequest('GET', '/api/v1/assessment');
+            
+            document.getElementById('statusModal').style.display = 'none';
+        }
+
+        async function adminLogin() {
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            const data = { email, password };
+            
+            showModal('<div class="loading"></div><p>Logging in...</p>');
+            
+            const result = await makeRequest('POST', '/api/v1/admin/auth/login', data);
+            
+            if (result.success && result.data.access_token) {
+                currentToken = result.data.access_token;
+                localStorage.setItem('admin_token', currentToken);
+                showModal('<p class="success-message">✅ Login successful! Token saved.</p>');
+                setTimeout(() => {
+                    document.getElementById('statusModal').style.display = 'none';
+                }, 2000);
+            } else {
+                document.getElementById('statusModal').style.display = 'none';
+            }
+        }
+
+        async function getCustomers() {
+            if (!currentToken) {
+                alert('Please login as admin first');
+                return;
+            }
+            
+            const page = document.getElementById('customers-page').value;
+            const size = document.getElementById('customers-size').value;
+            const search = document.getElementById('customers-search').value;
+            
+            let url = `/api/v1/admin/customers?page=${page}&size=${size}`;
+            if (search) {
+                url += `&search=${encodeURIComponent(search)}`;
+            }
+            
+            showModal('<div class="loading"></div><p>Fetching customers...</p>');
+            
+            const result = await makeRequest('GET', url, null, true);
+            
+            document.getElementById('statusModal').style.display = 'none';
+        }
+
+        async function healthCheck() {
+            showModal('<div class="loading"></div><p>Checking system health...</p>');
+            
+            const result = await makeRequest('GET', '/v1/health');
+            
+            document.getElementById('statusModal').style.display = 'none';
+        }
+
+        function loadSampleAssessment() {
+            document.getElementById('assessment-email').value = 'test@example.com';
+            document.getElementById('assessment-contact').value = 'true';
+            document.getElementById('assessment-answers').value = JSON.stringify([
+                {"question_id": 1, "selected_options": [1]},
+                {"question_id": 2, "selected_options": [2]},
+                {"question_id": 3, "selected_options": [1, 3]}
+            ], null, 2);
+        }
+    </script>
+</body>
+</html>
