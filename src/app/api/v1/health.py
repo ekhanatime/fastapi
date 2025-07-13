@@ -7,6 +7,17 @@ from ...core.db.database import async_get_db
 
 router = APIRouter(tags=["Health Check"])
 
+# Root health endpoint for requests to /health (without /api/v1 prefix)
+@router.get("/", include_in_schema=False)
+async def root_health_check():
+    """Root health check endpoint accessible at /health"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "Security Assessment API",
+        "message": "FastAPI backend is operational"
+    }
+
 @router.get("/health")
 async def health_check():
     """Basic health check endpoint"""

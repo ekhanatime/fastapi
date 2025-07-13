@@ -38,6 +38,24 @@ static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+# Root health endpoint for direct /health requests (fixes 404 errors)
+@app.get("/health")
+async def root_health():
+    """Root health check endpoint accessible at /health"""
+    from datetime import datetime
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "Security Assessment API",
+        "message": "FastAPI backend is operational",
+        "endpoints": {
+            "docs": "/docs",
+            "health_detailed": "/api/v1/health/detailed",
+            "assessment": "/api/v1/assessment",
+            "admin": "/api/v1/admin"
+        }
+    }
+
 # API Test Page route
 @app.get("/")
 async def api_test_page():

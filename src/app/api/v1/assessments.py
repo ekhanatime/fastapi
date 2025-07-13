@@ -27,6 +27,107 @@ from datetime import datetime
 router = APIRouter()
 
 
+@router.get("/")
+async def get_assessment_info(db: AsyncSession = Depends(async_get_db)):
+    """
+    Get basic assessment information and statistics.
+    This endpoint handles GET requests to /api/v1/assessment
+    """
+    try:
+        # Get total number of questions
+        questions_result = await db.execute(select(func.count(Question.id)))
+        total_questions = questions_result.scalar()
+        
+        # Get categories count
+        categories_result = await db.execute(select(func.count(Category.id)))
+        total_categories = categories_result.scalar()
+        
+        # Get total assessments completed
+        assessments_result = await db.execute(
+            select(func.count(Assessment.id)).where(Assessment.status == "completed")
+        )
+        total_completed = assessments_result.scalar()
+        
+        return {
+            "message": "Security Assessment API",
+            "status": "operational",
+            "total_questions": total_questions,
+            "total_categories": total_categories,
+            "assessments_completed": total_completed,
+            "estimated_time_minutes": max(5, total_questions * 2) if total_questions else 15,
+            "available_endpoints": [
+                "POST /api/v1/assessment/start - Start new assessment",
+                "POST /api/v1/assessment/submit - Submit assessment answers",
+                "GET /api/v1/assessment/{assessment_id} - Get assessment results",
+                "GET /api/v1/assessment/user/{user_id} - Get user's assessments"
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving assessment info: {str(e)}")
+
+
+@router.get("/data/full")
+async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
+    """
+    Get full assessment data including all questions and categories.
+    This endpoint handles GET requests to /v1/assessment-data/full
+    """
+    try:
+        # Get all categories with questions
+        categories_result = await db.execute(
+            select(Category).order_by(Category.name)
+        )
+        categories = categories_result.scalars().all()
+        
+        assessment_data = []
+        for category in categories:
+            # Get questions for this category
+            questions_result = await db.execute(
+                select(Question).where(Question.category_id == category.id).order_by(Question.id)
+            )
+            questions = questions_result.scalars().all()
+            
+            category_questions = []
+            for question in questions:
+                # Get options for this question
+                options_result = await db.execute(
+                    select(QuestionOption).where(QuestionOption.question_id == question.id).order_by(QuestionOption.id)
+                )
+                options = options_result.scalars().all()
+                
+                question_data = {
+                    "id": question.id,
+                    "text": question.question_text,
+                    "type": question.question_type,
+                    "weight": question.weight,
+                    "options": [
+                        {
+                            "id": opt.id,
+                            "value": opt.option_value,
+                            "label": opt.option_label
+                        } for opt in options
+                    ]
+                }
+                category_questions.append(question_data)
+            
+            category_data = {
+                "id": category.id,
+                "name": category.name,
+                "description": category.description,
+                "questions": category_questions
+            }
+            assessment_data.append(category_data)
+        
+        return {
+            "status": "success",
+            "total_categories": len(assessment_data),
+            "total_questions": sum(len(cat["questions"]) for cat in assessment_data),
+            "categories": assessment_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving full assessment data: {str(e)}")
+
+
 @router.post("/start", response_model=AssessmentStartResponse)
 async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSession = Depends(async_get_db), current_user: dict = Depends(get_current_user)):
     """

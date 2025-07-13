@@ -39,12 +39,17 @@ router.include_router(tiers_router)
 router.include_router(rate_limits_router)
 router.include_router(assessment_router)
 router.include_router(anonymous_assessment_router)
+# Health endpoints - accessible at /api/v1/health
 router.include_router(health_router, tags=["health"])
+
+# Assessment endpoints - accessible at /api/v1/assessment (singular to match API test console)
+router.include_router(assessments_router, prefix="/assessment", tags=["assessments"])
+
+# Other endpoints with standard prefixes
 router.include_router(categories_router, prefix="/categories", tags=["categories"])
 router.include_router(questions_router, prefix="/questions", tags=["questions"])
 router.include_router(question_options_router, prefix="/question-options", tags=["question-options"])
 router.include_router(leads_router, prefix="/leads", tags=["leads"])
-router.include_router(assessments_router, prefix="/assessments", tags=["assessments"])
 
 # Register new comprehensive endpoints
 router.include_router(user_answers_router, prefix="/user-answers", tags=["user-answers"])
