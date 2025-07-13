@@ -63,6 +63,13 @@
             border-radius: 20px;
             background: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .status-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
         .status-dot {
@@ -98,6 +105,33 @@
 
         .docs-link:hover {
             background: #0056b3;
+        }
+
+        .health-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .health-details h4 {
+            margin: 10px 0 5px 0;
+            color: #495057;
+        }
+
+        .health-details p {
+            margin: 5px 0;
+        }
+
+        .status-online {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-offline {
+            color: #dc3545;
+            font-weight: bold;
         }
 
         .main-content {
@@ -361,15 +395,15 @@
         </div>
 
         <div class="status-bar">
-            <div class="status-item">
+            <div class="status-item" onclick="showHealthDetails()" title="Click to view detailed health information">
                 <div class="status-dot status-online" id="api-status"></div>
                 <span>API Server: <span id="api-status-text">Checking...</span></span>
             </div>
-            <div class="status-item">
+            <div class="status-item" onclick="showHealthDetails()" title="Click to view detailed health information">
                 <div class="status-dot status-online" id="db-status"></div>
                 <span>Database: <span id="db-status-text">Checking...</span></span>
             </div>
-            <div class="status-item">
+            <div class="status-item" onclick="showHealthDetails()" title="Click to view detailed health information">
                 <div class="status-dot status-online" id="redis-status"></div>
                 <span>Redis: <span id="redis-status-text">Checking...</span></span>
             </div>
@@ -614,7 +648,7 @@
         async function checkSystemStatus() {
             // Check API Server
             try {
-                const response = await fetch('/v1/health');
+                const response = await fetch('/health');
                 updateStatus('api', response.ok, response.ok ? 'Online' : 'Error');
             } catch (error) {
                 updateStatus('api', false, 'Offline');
@@ -622,7 +656,7 @@
 
             // Check Database (through API)
             try {
-                const response = await fetch('/v1/assessment-data/full');
+                const response = await fetch('/api/v1/assessment/data/full');
                 updateStatus('db', response.ok, response.ok ? 'Connected' : 'Error');
             } catch (error) {
                 updateStatus('db', false, 'Disconnected');
@@ -785,11 +819,40 @@
         }
 
         async function healthCheck() {
-            showModal('<div class="loading"></div><p>Checking system health...</p>');
+            showModal('<div class="loading"></div><p>Checking detailed system health...</p>');
             
-            const result = await makeRequest('GET', '/v1/health');
-            
-            document.getElementById('statusModal').style.display = 'none';
+            try {
+                // Get detailed health information
+                const response = await fetch('/api/v1/health/detailed');
+                const healthData = await response.json();
+                
+                // Format health data for display
+                let healthHtml = '<h3>🏥 System Health Report</h3>';
+                healthHtml += `<p><strong>Status:</strong> <span class="status-${response.ok ? 'online' : 'offline'}">${response.ok ? '✅ Healthy' : '❌ Issues Detected'}</span></p>`;
+                healthHtml += '<div class="health-details">';
+                
+                if (healthData.database) {
+                    healthHtml += `<p><strong>Database:</strong> <span class="status-${healthData.database.status === 'healthy' ? 'online' : 'offline'}">${healthData.database.status === 'healthy' ? '✅ Connected' : '❌ Error'}</span></p>`;
+                    if (healthData.database.details) {
+                        healthHtml += `<p><small>Connection: ${healthData.database.details}</small></p>`;
+                    }
+                }
+                
+                if (healthData.services) {
+                    healthHtml += '<h4>Services:</h4>';
+                    for (const [service, status] of Object.entries(healthData.services)) {
+                        healthHtml += `<p><strong>${service}:</strong> <span class="status-${status === 'healthy' ? 'online' : 'offline'}">${status === 'healthy' ? '✅ Running' : '❌ Error'}</span></p>`;
+                    }
+                }
+                
+                healthHtml += `<p><small>Last checked: ${new Date().toLocaleString()}</small></p>`;
+                healthHtml += '</div>';
+                
+                showModal(healthHtml);
+                
+            } catch (error) {
+                showModal(`<h3>❌ Health Check Failed</h3><p>Could not retrieve system health information.</p><p><strong>Error:</strong> ${error.message}</p>`);
+            }
         }
 
         function loadSampleAssessment() {
@@ -800,6 +863,11 @@
                 {"question_id": 2, "selected_options": [2]},
                 {"question_id": 3, "selected_options": [1, 3]}
             ], null, 2);
+        }
+
+        // Show health details when status indicators are clicked
+        function showHealthDetails() {
+            healthCheck();
         }
     </script>
 </body>
