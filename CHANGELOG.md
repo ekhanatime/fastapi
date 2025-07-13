@@ -5,6 +5,83 @@ All notable changes to the Security Assessment API will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [3.0.0] - 2025-07-14
+
+### 🚀 Major Features Added
+
+#### Seamless Auto-Login and Assessment Flow
+
+- **Complete User Flow Refactor**: Implemented seamless user experience from email entry to assessment completion
+- **Auto-Account Creation**: Users automatically get accounts with temporary passwords upon email submission
+- **Authentication Architecture**: Proper separation of public and protected endpoints
+- **Assessment Flow**: Sequential flow: Create Account → Start Assessment → Load Questions → Submit with Auth
+
+
+#### Backend API Enhancements
+
+- **Lead Capture Endpoint**: `POST /api/v1/lead-capture/capture-lead` creates users with temporary passwords
+- **Assessment Start Endpoint**: `POST /api/v1/assessment/start` works without authentication for new users
+- **Assessment Submit Endpoint**: `POST /api/v1/assessment/submit` requires authentication for security
+- **Auto UserProfile Creation**: Backend automatically creates UserProfile records for new users
+- **Email Service Integration**: Login link generation with embedded credentials
+
+#### Frontend Implementation
+
+- **Refactored JavaScript Flow**: Proper sequencing of account creation, assessment start, and question loading
+- **Authentication State Management**: Stores user credentials and assessment IDs properly
+- **Error Handling**: Comprehensive error handling and user feedback
+- **DOM Rendering Fixes**: Fixed element ID mismatches and rendering issues
+
+### 🔧 Technical Improvements
+
+#### Database & Models
+
+- **User Creation Optimization**: Minimal user creation (email + password only) to avoid constraint violations
+- **Assessment Tracking**: Proper user_id and assessment_id linkage for submissions and results
+- **UserProfile Auto-Creation**: Default profiles created automatically for new users
+
+#### Security Enhancements
+
+- **Temporary Password System**: Cryptographically secure 12+ character passwords
+- **JWT Authentication**: Proper token-based authentication for protected endpoints
+- **Password Hashing**: bcrypt hashing for all stored passwords
+- **Endpoint Protection**: Clear separation of public vs authenticated endpoints
+
+#### Email System
+
+- **SMTP Integration**: Full email service with HTML templates
+- **Development Mode**: Email simulation when SMTP not configured
+- **Login Link Generation**: Secure login URLs with embedded credentials
+
+### 🐛 Bug Fixes
+
+- **Fixed DOM Rendering**: Corrected element ID from `questions-container` to `question-content`
+- **Fixed Import Errors**: Resolved backend module import path issues
+- **Fixed Database Constraints**: Eliminated duplicate key violations from test users
+- **Fixed Authentication Flow**: Proper credential handling and token management
+- **Fixed Assessment Start**: Removed authentication requirement for initial assessment start
+
+### 📚 Documentation
+
+- **Complete User Flow Documentation**: Comprehensive guide with mermaid diagrams
+- **API Documentation**: Updated endpoint documentation with authentication requirements
+- **Authentication Guide**: Detailed authentication architecture documentation
+- **Deployment Guide**: Updated Docker and environment setup instructions
+
+### 🔄 Breaking Changes
+
+- **Assessment Start Endpoint**: Now works without authentication (breaking change for existing clients)
+- **User Creation Flow**: Lead capture now returns temporary passwords (API response change)
+- **Frontend Flow**: Complete refactor of email submission and assessment flow
+
+### 📋 Migration Notes
+
+- Clear existing test users from database before testing new flow
+- Update frontend clients to handle new API response format
+- Configure SMTP settings for production email delivery
+- Update authentication tokens for protected endpoint access
+
 ## [3.0.0] - 2025-07-13 🚀 MAJOR RELEASE
 
 ### 🎯 Complete Success - All Endpoints Now Functional

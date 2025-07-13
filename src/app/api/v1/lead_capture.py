@@ -48,14 +48,11 @@ async def capture_lead(
         temp_password = generate_temporary_password()
         hashed_password = get_password_hash(temp_password)
         
-        # Create new user with temporary password
-        new_user = User()
-        new_user.email = lead_data.email
-        new_user.hashed_password = hashed_password
-        new_user.lead_status = "new"
-        new_user.subscription_tier = "free"
-        new_user.assessments_count = 0
-        new_user.max_assessments = 3
+        # Create new user with minimal required fields only
+        new_user = User(
+            email=lead_data.email,
+            hashed_password=hashed_password
+        )
         
         db.add(new_user)
         

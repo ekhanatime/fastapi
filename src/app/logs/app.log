@@ -288,3 +288,27 @@ socket.gaierror: [Errno -2] Name or service not known
 2025-07-13 22:51:16,336 - root - INFO - Returning 7 categories with nested questions and options
 2025-07-13 22:51:16,337 - root - INFO - First category 'password_auth' has 3 questions
 2025-07-13 22:51:16,338 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-13 23:24:23,476 - root - INFO - Fetched categories: 7
+2025-07-13 23:24:23,480 - root - INFO - Fetched questions: 24
+2025-07-13 23:24:23,486 - root - INFO - Fetched options: 78
+2025-07-13 23:24:23,488 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 23:24:23,488 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-13 23:24:23,489 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-13 23:24:23,576 - root - INFO - Fetched categories: 7
+2025-07-13 23:24:23,578 - root - INFO - Fetched questions: 24
+2025-07-13 23:24:23,581 - root - INFO - Fetched options: 78
+2025-07-13 23:24:23,583 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 23:24:23,584 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-13 23:24:23,585 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-13 23:28:22,427 - root - INFO - Fetched categories: 7
+2025-07-13 23:28:22,430 - root - INFO - Fetched questions: 24
+2025-07-13 23:28:22,432 - root - INFO - Fetched options: 78
+2025-07-13 23:28:22,434 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 23:28:22,435 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-13 23:28:22,436 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-13 23:42:50,700 - root - INFO - Fetched categories: 7
+2025-07-13 23:42:50,705 - root - INFO - Fetched questions: 24
+2025-07-13 23:42:50,710 - root - INFO - Fetched options: 78
+2025-07-13 23:42:50,711 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-13 23:42:50,712 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-13 23:42:50,712 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...

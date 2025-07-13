@@ -131,7 +131,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
 
 
 @router.post("/start", response_model=AssessmentStartResponse)
-async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSession = Depends(async_get_db), current_user: dict = Depends(get_current_user)):
+async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSession = Depends(async_get_db), current_user: dict = None):
     """
     Start a new assessment for a user.
     Checks if user can take more assessments based on their tier.
@@ -142,11 +142,21 @@ async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSes
     else:
         user_id = assessment_data.user_id
     
-    # Get user profile
+    # Get or create user profile
     result = await db.execute(select(UserProfile).where(UserProfile.user_id == user_id))
     user_profile = result.scalar_one_or_none()
+    
     if not user_profile:
-        raise HTTPException(status_code=404, detail="User profile not found")
+        # Create default user profile for new users
+        user_profile = UserProfile(
+            user_id=user_id,
+            assessments_count=0,
+            max_assessments=3,  # Default limit for new users
+            tier="free"
+        )
+        db.add(user_profile)
+        await db.commit()
+        await db.refresh(user_profile)
     
     # Check if user has reached assessment limit
     if user_profile.assessments_count >= user_profile.max_assessments:
@@ -195,7 +205,7 @@ async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSes
 
 
 @router.post("/submit", response_model=AssessmentResult)
-async def submit_assessment(submission: AssessmentSubmission, db: Annotated[AsyncSession, Depends(async_get_db)]):
+async def submit_assessment(submission: AssessmentSubmission, db: Annotated[AsyncSession, Depends(async_get_db)], current_user: dict = Depends(get_current_user)):
     """
     Submit assessment answers and calculate results.
     """

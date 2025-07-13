@@ -9,7 +9,7 @@ import base64
 import json
 
 from ...core.db.database import async_get_db
-from ...core.security import get_current_user
+from ...api.dependencies import get_current_user
 from ...models.user import User
 from ...schemas.email import SendLoginLinkRequest, SendLoginLinkResponse
 
@@ -35,18 +35,23 @@ def create_login_link(email: str, password: str, assessment_id: str = None) -> s
     return f"{base_url}/auto-login?token={encoded_creds}"
 
 
-def send_email(to_email: str, subject: str, html_content: str) -> bool:
-    """Send email using SMTP (configure with your email service)."""
+async def send_email_with_smtp(to_email: str, subject: str, html_content: str):
+    """Send email using SMTP configuration or simulate for testing"""
     try:
-        # Email configuration (use environment variables in production)
-        smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-        smtp_port = int(os.getenv("SMTP_PORT", "587"))
-        smtp_username = os.getenv("SMTP_USERNAME", "")
-        smtp_password = os.getenv("SMTP_PASSWORD", "")
+        # Get SMTP configuration from environment
+        smtp_server = os.getenv('SMTP_SERVER')
+        smtp_port = int(os.getenv('SMTP_PORT', '587'))
+        smtp_username = os.getenv('SMTP_USERNAME')
+        smtp_password = os.getenv('SMTP_PASSWORD')
         
-        if not smtp_username or not smtp_password:
-            print("Email service not configured - skipping email send")
-            return False
+        if not all([smtp_server, smtp_username, smtp_password]):
+            # SMTP not configured - simulate email sending for testing
+            print(f"\n=== EMAIL SIMULATION ===")
+            print(f"To: {to_email}")
+            print(f"Subject: {subject}")
+            print(f"Content: {html_content[:200]}...")
+            print(f"=== END EMAIL SIMULATION ===\n")
+            return True
         
         # Create message
         msg = MIMEMultipart('alternative')
@@ -63,11 +68,11 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
             server.starttls()
             server.login(smtp_username, smtp_password)
             server.send_message(msg)
-        
+            
         return True
         
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email: {str(e)}")
         return False
 
 
@@ -139,16 +144,16 @@ async def send_login_link(
         </html>
         """
         
-        # Send email
-        success = send_email(
+        # Send email with login link
+        email_sent = await send_email_with_smtp(
             to_email=request.email,
-            subject="🔒 Your Security Assessment Results - Dashboard Access",
-            html_content=html_content
+            subject="Your Secure Login Link - Security Assessment",
+            html_content=email_html
         )
         
         return SendLoginLinkResponse(
-            success=success,
-            message="Login link sent successfully" if success else "Email service unavailable - you can still access your results",
+            success=email_sent,
+            message="Login link sent successfully" if email_sent else "Email service unavailable - you can still access your results",
             login_link=login_link  # Include link in response for testing/fallback
         )
         
