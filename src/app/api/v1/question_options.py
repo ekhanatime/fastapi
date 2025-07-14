@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import List, Optional
 
 from ...core.db.database import async_get_db
@@ -18,14 +18,20 @@ async def list_question_options(
     db: AsyncSession = Depends(async_get_db)
 ):
     """List all question options with pagination and filtering."""
-    query = db.query(QuestionOption)
-    
+    query = select(QuestionOption)
+    count_query = select(func.count()).select_from(QuestionOption)
+
     if question_id:
-        query = query.filter(QuestionOption.question_id == question_id)
-    
-    options = query.order_by(QuestionOption.display_order, QuestionOption.id).offset(skip).limit(limit).all()
-    total = query.count()
-    
+        query = query.where(QuestionOption.question_id == question_id)
+        count_query = count_query.where(QuestionOption.question_id == question_id)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar_one()
+
+    query = query.order_by(QuestionOption.display_order, QuestionOption.id).offset(skip).limit(limit)
+    result = await db.execute(query)
+    options = result.scalars().all()
+
     return QuestionOptionList(
         options=[QuestionOptionResponse.from_orm(opt) for opt in options],
         total=total
@@ -35,7 +41,8 @@ async def list_question_options(
 @router.get("/{option_id}", response_model=QuestionOptionResponse)
 async def get_question_option(option_id: int, db: AsyncSession = Depends(async_get_db)):
     """Get a specific question option by ID."""
-    option = db.query(QuestionOption).filter(QuestionOption.id == option_id).first()
+    result = await db.execute(select(QuestionOption).where(QuestionOption.id == option_id))
+    option = result.scalars().first()
     if not option:
         raise HTTPException(status_code=404, detail="Question option not found")
     
@@ -46,15 +53,16 @@ async def get_question_option(option_id: int, db: AsyncSession = Depends(async_g
 async def create_question_option(option_data: QuestionOptionCreate, db: AsyncSession = Depends(async_get_db)):
     """Create a new question option."""
     # Verify question exists
-    from app.models.question import Question
-    question = db.query(Question).filter(Question.id == option_data.question_id).first()
+    from ...models.question import Question
+    result = await db.execute(select(Question).where(Question.id == option_data.question_id))
+    question = result.scalars().first()
     if not question:
         raise HTTPException(status_code=400, detail="Question not found")
     
     option = QuestionOption(**option_data.dict())
     db.add(option)
-    db.commit()
-    db.refresh(option)
+    await db.commit()
+    await db.refresh(option)
     
     return QuestionOptionResponse.from_orm(option)
 
@@ -66,14 +74,16 @@ async def update_question_option(
     db: AsyncSession = Depends(async_get_db)
 ):
     """Update an existing question option."""
-    option = db.query(QuestionOption).filter(QuestionOption.id == option_id).first()
+    result = await db.execute(select(QuestionOption).where(QuestionOption.id == option_id))
+    option = result.scalars().first()
     if not option:
         raise HTTPException(status_code=404, detail="Question option not found")
     
     # Verify question exists if being updated
     if option_data.question_id:
-        from app.models.question import Question
-        question = db.query(Question).filter(Question.id == option_data.question_id).first()
+        from ...models.question import Question
+        result = await db.execute(select(Question).where(Question.id == option_data.question_id))
+        question = result.scalars().first()
         if not question:
             raise HTTPException(status_code=400, detail="Question not found")
     
@@ -82,8 +92,8 @@ async def update_question_option(
     for field, value in update_data.items():
         setattr(option, field, value)
     
-    db.commit()
-    db.refresh(option)
+    await db.commit()
+    await db.refresh(option)
     
     return QuestionOptionResponse.from_orm(option)
 
@@ -91,11 +101,12 @@ async def update_question_option(
 @router.delete("/{option_id}", status_code=204)
 async def delete_question_option(option_id: int, db: AsyncSession = Depends(async_get_db)):
     """Delete a question option."""
-    option = db.query(QuestionOption).filter(QuestionOption.id == option_id).first()
+    result = await db.execute(select(QuestionOption).where(QuestionOption.id == option_id))
+    option = result.scalars().first()
     if not option:
         raise HTTPException(status_code=404, detail="Question option not found")
     
-    db.delete(option)
-    db.commit()
+    await db.delete(option)
+    await db.commit()
     
     return None

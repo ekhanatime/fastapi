@@ -343,7 +343,17 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
     assessment.max_possible_score = max_possible_score
     assessment.percentage_score = percentage_score
     assessment.risk_level = risk_level
-    assessment.category_scores = category_scores_data
+    assessment.category_scores = {
+        str(cat.id): {
+            "score": category_scores_data.get(cat.id, {}).get("score", 0),
+            "max_score": category_scores_data.get(cat.id, {}).get("max_score", 0),
+            "percentage": (
+                (category_scores_data.get(cat.id, {}).get("score", 0) / category_scores_data.get(cat.id, {}).get("max_score", 1) * 100)
+                if category_scores_data.get(cat.id, {}).get("max_score")
+                else 0
+            )
+        } for cat in categories
+    }
     assessment.recommendations = recommendations
     assessment.share_token = share_token
     
@@ -358,7 +368,7 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
     
     return AssessmentResult(
         assessment_id=assessment.id,
-        user_id=assessment.user_id,
+        user_id=current_user.get("id"),
         status=assessment.status,
         total_score=total_score,
         max_possible_score=max_possible_score,
@@ -370,19 +380,14 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
         completed_at=assessment.completed_at,
         share_token=share_token
     )
+    
 
 
 @router.post("/submit-shared", response_model=AssessmentResult)
-async def submit_shared_assessment(
-    submission: SharedAssessmentSubmission, 
-    db: Annotated[AsyncSession, Depends(async_get_db)]
-):
-    """
-    Submit assessment answers via shared company link.
-    The assessment will be attributed to the customer who generated the sharing token.
-    """
-    # First, find the user who owns this company token
-    # For now, we'll use the share_token field in assessments table
+async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: Annotated[AsyncSession, Depends(async_get_db)]):
+    """Submit an assessment from a shared link (anonymous user)."""
+    
+    # Find the owner of the shared token
     result = await db.execute(
         select(Assessment).where(Assessment.share_token == submission.company_token)
     )
