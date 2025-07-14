@@ -5,7 +5,7 @@ from uuid import UUID
 
 
 class AssessmentStartRequest(BaseModel):
-    user_id: int = Field(..., description="User ID from main User table to start assessment for")
+    user_id: UUID = Field(..., description="User ID from main User table to start assessment for")
 
 
 class AnswerSubmission(BaseModel):

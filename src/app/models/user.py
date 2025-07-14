@@ -70,5 +70,12 @@ class User(Base):
         Index('idx_users_created_at', 'created_at'),
     )
 
+    def __init__(self, **kwargs):
+        """Initialize User with keyword arguments."""
+        super().__init__()
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', lead_status='{self.lead_status}')>"

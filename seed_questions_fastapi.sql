@@ -10,7 +10,7 @@ INSERT INTO questions (category_id, question_text, question_type, weight, displa
 ('password_auth', 'Hvilket av disse er det BESTE stedet å lagre arbeidspassordene dine?', 'single', 4, 4, true),
 
 -- Email Security and Phishing (4 questions)
-('email_phishing', 'Du mottar denne e-posten. Hva bør du gjøre?', 'single', 5, 5, true),
+('email_phishing', 'Du mottar en mistenkelig e-post. Hva bør du gjøre?', 'single', 5, 5, true),
 ('email_phishing', 'Hvilke av disse er røde flagg i en mistenkelig e-post? (Velg alle som gjelder)', 'multiple', 4, 6, true),
 ('email_phishing', 'Lederen din sender deg en haster e-post som ber om lønnsinformasjon for ansatte til et budsjettmøte. E-posten virker litt annerledes enn deres vanlige stil. Hva bør du gjøre?', 'single', 5, 7, true),
 ('email_phishing', 'Hva bør du gjøre hvis du ved en feil klikker på en mistenkelig lenke i en e-post? (Velg alle som gjelder)', 'multiple', 4, 8, true),
@@ -77,18 +77,23 @@ INSERT INTO question_options (question_id, option_value, option_text, is_correct
 (get_question_id_by_order('password_auth', 3), 'multiple_factors', 'Bruk av flere autentiseringsfaktorer (noe du vet, har, eller er)', true, 2),
 (get_question_id_by_order('password_auth', 3), 'complex_password', 'Et veldig komplekst passord', false, 3);
 
+
+
 -- Question 4 options (Password storage)
 INSERT INTO question_options (question_id, option_value, option_text, is_correct, display_order) VALUES
-(get_question_id_by_order('password_auth', 4), 'password_manager', 'En passordbehandler', true, 1),
-(get_question_id_by_order('password_auth', 4), 'browser_save', 'Lagret i nettleseren', false, 2),
-(get_question_id_by_order('password_auth', 4), 'sticky_note', 'På en lapp på skjermen', false, 3),
-(get_question_id_by_order('password_auth', 4), 'excel_file', 'I en Excel-fil på skrivebordet', false, 4);
+(get_question_id_by_order('password_auth', 4), 'password_manager', 'En passord-manager godkjent av bedriften', true, 1),
+(get_question_id_by_order('password_auth', 4), 'browser_storage', 'Nettleserens innebygde passordlagring', false, 2),
+(get_question_id_by_order('password_auth', 4), 'sticky_note', 'En klistrelapp på skjermen din', false, 3),
+(get_question_id_by_order('password_auth', 4), 'spreadsheet', 'Et regneark på datamaskinen din', false, 4);
 
 -- Question 5 options (Suspicious email)
 INSERT INTO question_options (question_id, option_value, option_text, is_correct, display_order) VALUES
-(get_question_id_by_order('email_phishing', 5), 'click_link', 'Klikke på lenken for å sjekke', false, 1),
-(get_question_id_by_order('email_phishing', 5), 'report_it', 'Rapportere det til IT-avdelingen', true, 2),
-(get_question_id_by_order('email_phishing', 5), 'delete_ignore', 'Slette e-posten og ignorere den', false, 3);
+(get_question_id_by_order('email_phishing', 5), 'click_link', 'Klikke på lenken for å se om den er ekte', false, 1),
+(get_question_id_by_order('email_phishing', 5), 'delete_report', 'Slette den umiddelbart og rapportere den som phishing/søppelpost', true, 2),
+(get_question_id_by_order('email_phishing', 5), 'reply_ask', 'Svare avsenderen og be om mer informasjon', false, 3),
+(get_question_id_by_order('email_phishing', 5), 'forward_warn', 'Videresende den til alle kollegene dine for å advare dem', false, 4);
+
+
 
 -- Question 6 options (Red flags in email - multiple choice)
 INSERT INTO question_options (question_id, option_value, option_text, is_correct, display_order) VALUES

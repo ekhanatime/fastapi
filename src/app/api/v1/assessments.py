@@ -131,16 +131,16 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
 
 
 @router.post("/start", response_model=AssessmentStartResponse)
-async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSession = Depends(async_get_db), current_user: dict = None):
+async def start_assessment(
+    data: AssessmentStartRequest,
+    db: Annotated[AsyncSession, Depends(async_get_db)]
+):
     """
     Start a new assessment for a user.
     Checks if user can take more assessments based on their tier.
     """
-    # Get user profile (either from authenticated user or by user_id for leads)
-    if current_user:
-        user_id = current_user["id"]
-    else:
-        user_id = assessment_data.user_id
+    # Get user profile from request data
+    user_id = data.user_id
     
     # Get or create user profile
     result = await db.execute(select(UserProfile).where(UserProfile.user_id == user_id))
@@ -148,12 +148,11 @@ async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSes
     
     if not user_profile:
         # Create default user profile for new users
-        user_profile = UserProfile(
-            user_id=user_id,
-            assessments_count=0,
-            max_assessments=3,  # Default limit for new users
-            tier="free"
-        )
+        user_profile = UserProfile()
+        user_profile.user_id = user_id
+        user_profile.assessments_count = 0
+        user_profile.max_assessments = 3  # Default limit for new users
+        user_profile.subscription_tier = "free"
         db.add(user_profile)
         await db.commit()
         await db.refresh(user_profile)
@@ -185,17 +184,17 @@ async def start_assessment(assessment_data: AssessmentStartRequest, db: AsyncSes
         )
     
     # Create new assessment
-    assessment = Assessment(
-        user_profile_id=user_profile.id,
-        status="started"
-    )
+    assessment = Assessment()
+    assessment.user_profile_id = user_profile.id
+    assessment.status = "started"
     db.add(assessment)
     await db.commit()
     await db.refresh(assessment)
     
     # Get questions count for response
-    questions_count = await db.execute(select(func.count()).select_from(Question).where(Question.is_active == True))
-    
+    questions_count_result = await db.execute(select(func.count()).select_from(Question).where(Question.is_active == True))
+    questions_count = questions_count_result.scalar_one()
+
     return AssessmentStartResponse(
         assessment_id=assessment.id,
         message="Assessment started successfully",

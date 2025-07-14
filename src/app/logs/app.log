@@ -312,3 +312,39 @@ socket.gaierror: [Errno -2] Name or service not known
 2025-07-13 23:42:50,711 - root - INFO - Returning 7 categories with nested questions and options
 2025-07-13 23:42:50,712 - root - INFO - First category 'password_auth' has 3 questions
 2025-07-13 23:42:50,712 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-14 13:57:33,706 - root - INFO - Fetched categories: 7
+2025-07-14 13:57:33,738 - root - INFO - Fetched questions: 24
+2025-07-14 13:57:33,743 - root - INFO - Fetched options: 78
+2025-07-14 13:57:33,744 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-14 13:57:33,745 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-14 13:57:33,746 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-14 14:27:49,653 - root - INFO - Fetched categories: 7
+2025-07-14 14:27:49,658 - root - INFO - Fetched questions: 24
+2025-07-14 14:27:49,664 - root - INFO - Fetched options: 78
+2025-07-14 14:27:49,666 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-14 14:27:49,667 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-14 14:27:49,667 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-14 14:32:29,469 - root - INFO - Fetched categories: 7
+2025-07-14 14:32:29,474 - root - INFO - Fetched questions: 24
+2025-07-14 14:32:29,482 - root - INFO - Fetched options: 78
+2025-07-14 14:32:29,484 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-14 14:32:29,485 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-14 14:32:29,486 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-14 15:21:38,081 - root - INFO - Fetched categories: 7
+2025-07-14 15:21:38,100 - root - INFO - Fetched questions: 24
+2025-07-14 15:21:38,142 - root - INFO - Fetched options: 78
+2025-07-14 15:21:38,144 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-14 15:21:38,144 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-14 15:21:38,145 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-14 15:38:32,970 - root - INFO - Fetched categories: 7
+2025-07-14 15:38:32,974 - root - INFO - Fetched questions: 24
+2025-07-14 15:38:32,978 - root - INFO - Fetched options: 78
+2025-07-14 15:38:32,979 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-14 15:38:32,980 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-14 15:38:32,980 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
+2025-07-14 15:38:54,859 - root - INFO - Fetched categories: 7
+2025-07-14 15:38:54,861 - root - INFO - Fetched questions: 24
+2025-07-14 15:38:54,863 - root - INFO - Fetched options: 78
+2025-07-14 15:38:54,864 - root - INFO - Returning 7 categories with nested questions and options
+2025-07-14 15:38:54,865 - root - INFO - First category 'password_auth' has 3 questions
+2025-07-14 15:38:54,866 - root - INFO - First question: Hva gjør et passord sikkert? (Velg alle som gjelde...
