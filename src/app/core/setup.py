@@ -1,9 +1,11 @@
+# Docs: ./docs/functions/core_setup.md | SPOT: ./SPOT.md#function-catalog
 from collections.abc import AsyncGenerator, Callable
 from contextlib import _AsyncGeneratorContextManager, asynccontextmanager
 from typing import Any
 
 import anyio
 import fastapi
+import os
 import redis.asyncio as redis
 from arq import create_pool
 from arq.connections import RedisSettings
@@ -31,6 +33,9 @@ from .db.database import async_engine as engine
 from .utils import cache, queue
 
 
+REDIS_DISABLED = os.getenv("DISABLE_REDIS_FOR_TESTS", "").lower() in {"1", "true", "yes"}
+
+
 # -------------- database --------------
 async def create_tables() -> None:
     async with engine.begin() as conn:
@@ -39,31 +44,43 @@ async def create_tables() -> None:
 
 # -------------- cache --------------
 async def create_redis_cache_pool() -> None:
+    if REDIS_DISABLED:
+        return
     cache.pool = redis.ConnectionPool.from_url(settings.REDIS_CACHE_URL)
     cache.client = redis.Redis.from_pool(cache.pool)  # type: ignore
 
 
 async def close_redis_cache_pool() -> None:
+    if REDIS_DISABLED:
+        return
     if cache.client is not None:
         await cache.client.aclose()  # type: ignore
 
 
 # -------------- queue --------------
 async def create_redis_queue_pool() -> None:
+    if REDIS_DISABLED:
+        return
     queue.pool = await create_pool(RedisSettings(host=settings.REDIS_QUEUE_HOST, port=settings.REDIS_QUEUE_PORT))
 
 
 async def close_redis_queue_pool() -> None:
+    if REDIS_DISABLED:
+        return
     if queue.pool is not None:
         await queue.pool.aclose()  # type: ignore
 
 
 # -------------- rate limit --------------
 async def create_redis_rate_limit_pool() -> None:
+    if REDIS_DISABLED:
+        return
     rate_limiter.initialize(settings.REDIS_RATE_LIMIT_URL)  # type: ignore
 
 
 async def close_redis_rate_limit_pool() -> None:
+    if REDIS_DISABLED:
+        return
     if rate_limiter.client is not None:
         await rate_limiter.client.aclose()  # type: ignore
 
@@ -107,7 +124,8 @@ def lifespan_factory(
             if isinstance(settings, RedisRateLimiterSettings):
                 await create_redis_rate_limit_pool()
 
-            if create_tables_on_start:
+            skip_tables = os.getenv("DISABLE_DB_FOR_TESTS", "").lower() in {"1", "true", "yes"}
+            if create_tables_on_start and not skip_tables:
                 await create_tables()
 
             initialization_complete.set()

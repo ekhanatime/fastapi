@@ -1,0 +1,5 @@
+erDiagram
+    SCORE_TEMPLATE ||--o{ SCORE_BUCKET : "qualifies"
+    SCORE_TEMPLATE ||--o{ SCORE_DIMENSION : "weights"
+    SCORE_DIMENSION ||--o{ SCORE_ITEM : "covers"
+    SCORE_TEMPLATE }o--|| SCORE_SCALE : "uses"
