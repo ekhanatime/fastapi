@@ -1,32 +1,58 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from typing import Annotated, List, Optional
+import secrets
+import uuid
+from datetime import datetime
+from typing import Annotated, List
 from uuid import UUID
 
-from ...core.db.database import async_get_db
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.dependencies import get_current_user
-from ...models.user_profile import UserProfile
+
+from ...core.db.database import async_get_db
+from ...assessment_templates import (
+    get_assessment_template,
+    list_assessment_templates,
+)
 from ...models.assessment import Assessment
+from ...models.category import Category
 from ...models.question import Question
 from ...models.question_option import QuestionOption
-from ...models.category import Category
 from ...models.user_profile import UserProfile
 from ...schemas.assessment import (
+    AssessmentResponse,
+    AssessmentResult,
     AssessmentStartRequest,
     AssessmentStartResponse,
     AssessmentSubmission,
+    CategoryScore,
     SharedAssessmentSubmission,
-    AssessmentResult,
-    AssessmentResponse,
-    CategoryScore
 )
-import uuid
-import secrets
-import string
-from datetime import datetime
+from ...schemas.assessment_template import (
+    AssessmentDefinition,
+    AssessmentTemplateSummary,
+)
 
 router = APIRouter()
+
+
+@router.get("/schema", response_model=list[AssessmentTemplateSummary])
+async def list_available_assessment_templates() -> list[AssessmentTemplateSummary]:
+    """List all bundled assessment templates."""
+
+    return list_assessment_templates()
+
+
+@router.get("/schema/{template_id}", response_model=AssessmentDefinition)
+async def get_assessment_template_definition(template_id: str) -> AssessmentDefinition:
+    """Retrieve a detailed assessment template definition."""
+
+    template = get_assessment_template(template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Assessment template not found")
+
+    return template
 
 
 @router.get("/")
@@ -39,17 +65,17 @@ async def get_assessment_info(db: AsyncSession = Depends(async_get_db)):
         # Get total number of questions
         questions_result = await db.execute(select(func.count(Question.id)))
         total_questions = questions_result.scalar()
-        
+
         # Get categories count
         categories_result = await db.execute(select(func.count(Category.id)))
         total_categories = categories_result.scalar()
-        
+
         # Get total assessments completed
         assessments_result = await db.execute(
             select(func.count(Assessment.id)).where(Assessment.status == "completed")
         )
         total_completed = assessments_result.scalar()
-        
+
         return {
             "message": "Security Assessment API",
             "status": "operational",
@@ -80,7 +106,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
             select(Category).order_by(Category.title)
         )
         categories = categories_result.scalars().all()
-        
+
         assessment_data = []
         for category in categories:
             # Get questions for this category
@@ -88,7 +114,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
                 select(Question).where(Question.category_id == category.id).order_by(Question.id)
             )
             questions = questions_result.scalars().all()
-            
+
             category_questions = []
             for question in questions:
                 # Get options for this question
@@ -96,7 +122,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
                     select(QuestionOption).where(QuestionOption.question_id == question.id).order_by(QuestionOption.id)
                 )
                 options = options_result.scalars().all()
-                
+
                 question_data = {
                     "id": question.id,
                     "text": question.question_text,
@@ -111,7 +137,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
                     ]
                 }
                 category_questions.append(question_data)
-            
+
             category_data = {
                 "id": category.id,
                 "name": category.title,
@@ -119,7 +145,7 @@ async def get_assessment_data_full(db: AsyncSession = Depends(async_get_db)):
                 "questions": category_questions
             }
             assessment_data.append(category_data)
-        
+
         return {
             "status": "success",
             "total_categories": len(assessment_data),
@@ -141,11 +167,11 @@ async def start_assessment(
     """
     # Get user profile from request data
     user_id = data.user_id
-    
+
     # Get or create user profile
     result = await db.execute(select(UserProfile).where(UserProfile.user_id == user_id))
     user_profile = result.scalar_one_or_none()
-    
+
     if not user_profile:
         # Create default user profile for new users
         user_profile = UserProfile()
@@ -156,14 +182,14 @@ async def start_assessment(
         db.add(user_profile)
         await db.commit()
         await db.refresh(user_profile)
-    
+
     # Check if user has reached assessment limit
     if user_profile.assessments_count >= user_profile.max_assessments:
         raise HTTPException(
-            status_code=403, 
+            status_code=403,
             detail=f"Assessment limit reached. You have completed {user_profile.assessments_count}/{user_profile.max_assessments} assessments."
         )
-    
+
     # Check for existing incomplete assessment
     result = await db.execute(
         select(Assessment).where(
@@ -172,7 +198,7 @@ async def start_assessment(
         )
     )
     existing_assessment = result.scalar_one_or_none()
-    
+
     if existing_assessment:
         # Return existing assessment
         questions_count = await db.execute(select(func.count()).select_from(Question).where(Question.is_active == True))
@@ -182,7 +208,7 @@ async def start_assessment(
             questions_count=questions_count.scalar_one(),
             estimated_time_minutes=max(5, questions_count.scalar_one() * 2)  # 2 minutes per question, min 5
         )
-    
+
     # Create new assessment
     assessment = Assessment()
     assessment.user_profile_id = user_profile.id
@@ -190,7 +216,7 @@ async def start_assessment(
     db.add(assessment)
     await db.commit()
     await db.refresh(assessment)
-    
+
     # Get questions count for response
     questions_count_result = await db.execute(select(func.count()).select_from(Question).where(Question.is_active == True))
     questions_count = questions_count_result.scalar_one()
@@ -213,10 +239,10 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
     assessment = result.scalar_one_or_none()
     if not assessment:
         raise HTTPException(status_code=404, detail="Assessment not found")
-    
+
     if assessment.status == "completed":
         raise HTTPException(status_code=400, detail="Assessment already completed")
-    
+
     # Store answers
     answers_data = {}
     for answer in submission.answers:
@@ -224,51 +250,51 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
             "selected_options": answer.selected_options,
             "text_answer": answer.text_answer
         }
-    
+
     assessment.answers = answers_data
     assessment.status = "completed"
     assessment.completed_at = datetime.utcnow()
-    
+
     # Calculate scores
     total_score = 0.0
     max_possible_score = 0.0
     category_scores_data = {}
-    
+
     # Get all questions and their options
     result = await db.execute(select(Question).where(Question.is_active == True))
     questions = result.scalars().all()
-    
+
     for question in questions:
         question_score = 0.0
         max_question_score = question.weight
-        
+
         if str(question.id) in answers_data:
             answer_data = answers_data[str(question.id)]
             selected_option_ids = answer_data.get("selected_options", [])
-            
+
             # Calculate score based on selected options
             for option_id in selected_option_ids:
                 option_result = await db.execute(select(QuestionOption).where(QuestionOption.id == option_id))
                 option = option_result.scalar_one_or_none()
                 if option:
                     question_score += option.score_points
-        
+
         # Add to category scores
         if question.category_id not in category_scores_data:
             category_scores_data[question.category_id] = {
                 "score": 0.0,
                 "max_score": 0.0
             }
-        
+
         category_scores_data[question.category_id]["score"] += question_score
         category_scores_data[question.category_id]["max_score"] += max_question_score
-        
+
         total_score += question_score
         max_possible_score += max_question_score
-    
+
     # Calculate percentage
     percentage_score = (total_score / max_possible_score * 100) if max_possible_score > 0 else 0
-    
+
     # Determine risk level
     if percentage_score >= 80:
         risk_level = "low"
@@ -278,17 +304,17 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
         risk_level = "high"
     else:
         risk_level = "critical"
-    
+
     # Generate category scores for response
     category_scores_list = []
     categories_result = await db.execute(select(Category).where(Category.is_active == True))
     categories = categories_result.scalars().all()
-    
+
     for category in categories:
         if category.id in category_scores_data:
             cat_data = category_scores_data[category.id]
             cat_percentage = (cat_data["score"] / cat_data["max_score"] * 100) if cat_data["max_score"] > 0 else 0
-            
+
             # Determine category risk level
             if cat_percentage >= 80:
                 cat_risk = "low"
@@ -298,7 +324,7 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
                 cat_risk = "high"
             else:
                 cat_risk = "critical"
-            
+
             category_scores_list.append(CategoryScore(
                 category_id=category.id,
                 category_title=category.title,
@@ -307,7 +333,7 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
                 percentage=cat_percentage,
                 risk_level=cat_risk
             ))
-    
+
     # Generate basic recommendations
     recommendations = []
     if risk_level == "critical":
@@ -334,10 +360,10 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
             "Maintain current security practices",
             "Stay updated with latest security trends"
         ])
-    
+
     # Generate share token
     share_token = secrets.token_urlsafe(32)
-    
+
     # Update assessment with results
     assessment.total_score = total_score
     assessment.max_possible_score = max_possible_score
@@ -356,16 +382,16 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
     }
     assessment.recommendations = recommendations
     assessment.share_token = share_token
-    
+
     # Update user profile assessment count
     user_profile_result = await db.execute(select(UserProfile).where(UserProfile.id == assessment.user_profile_id))
     user_profile = user_profile_result.scalar_one_or_none()
     if user_profile:
         user_profile.assessments_count += 1
-    
+
     await db.commit()
     await db.refresh(assessment)
-    
+
     return AssessmentResult(
         assessment_id=assessment.id,
         user_id=current_user.get("id"),
@@ -380,13 +406,13 @@ async def submit_assessment(submission: AssessmentSubmission, db: Annotated[Asyn
         completed_at=assessment.completed_at,
         share_token=share_token
     )
-    
+
 
 
 @router.post("/submit-shared", response_model=AssessmentResult)
 async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: Annotated[AsyncSession, Depends(async_get_db)]):
     """Submit an assessment from a shared link (anonymous user)."""
-    
+
     # Find the owner of the shared token
     result = await db.execute(
         select(Assessment).where(Assessment.share_token == submission.company_token)
@@ -394,7 +420,7 @@ async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: A
     owner_assessment = result.scalar_one_or_none()
     if not owner_assessment:
         raise HTTPException(status_code=404, detail="Invalid sharing token")
-    
+
     # Get the user profile of the token owner
     user_result = await db.execute(
         select(UserProfile).where(UserProfile.id == owner_assessment.user_profile_id)
@@ -402,7 +428,7 @@ async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: A
     owner_user = user_result.scalar_one_or_none()
     if not owner_user:
         raise HTTPException(status_code=404, detail="Token owner not found")
-    
+
     # Create a new assessment for this shared submission
     new_assessment = Assessment(
         id=uuid.uuid4(),
@@ -411,10 +437,10 @@ async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: A
         share_token=submission.company_token,  # Keep reference to original token
         created_at=datetime.utcnow()
     )
-    
+
     db.add(new_assessment)
     await db.flush()  # Get the ID
-    
+
     # Store answers
     answers_data = {}
     for answer in submission.answers:
@@ -422,51 +448,51 @@ async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: A
             "selected_options": answer.selected_options,
             "text_answer": answer.text_answer
         }
-    
+
     new_assessment.answers = answers_data
     new_assessment.status = "completed"
     new_assessment.completed_at = datetime.utcnow()
-    
+
     # Calculate scores (same logic as regular submission)
     total_score = 0.0
     max_possible_score = 0.0
     category_scores_data = {}
-    
+
     # Get all questions and their options
     questions_result = await db.execute(select(Question).where(Question.is_active == True))
     questions = questions_result.scalars().all()
-    
+
     for question in questions:
         question_score = 0.0
         max_question_score = question.weight
-        
+
         if str(question.id) in answers_data:
             answer_data = answers_data[str(question.id)]
             selected_option_ids = answer_data.get("selected_options", [])
-            
+
             # Calculate score based on selected options
             for option_id in selected_option_ids:
                 option_result = await db.execute(select(QuestionOption).where(QuestionOption.id == option_id))
                 option = option_result.scalar_one_or_none()
                 if option:
                     question_score += option.score_points
-        
+
         # Add to category scores
         if question.category_id not in category_scores_data:
             category_scores_data[question.category_id] = {
                 "score": 0.0,
                 "max_score": 0.0
             }
-        
+
         category_scores_data[question.category_id]["score"] += question_score
         category_scores_data[question.category_id]["max_score"] += max_question_score
-        
+
         total_score += question_score
         max_possible_score += max_question_score
-    
+
     # Calculate percentage and risk level
     percentage_score = (total_score / max_possible_score * 100) if max_possible_score > 0 else 0
-    
+
     if percentage_score >= 80:
         risk_level = "Low"
     elif percentage_score >= 60:
@@ -475,22 +501,22 @@ async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: A
         risk_level = "High"
     else:
         risk_level = "Critical"
-    
+
     new_assessment.total_score = total_score
     new_assessment.percentage_score = percentage_score
     new_assessment.risk_level = risk_level
     new_assessment.category_scores = category_scores_data
-    
+
     # Create category scores list for response
     category_scores_list = []
     categories_result = await db.execute(select(Category))
     categories = categories_result.scalars().all()
-    
+
     for category in categories:
         if category.id in category_scores_data:
             score_data = category_scores_data[category.id]
             category_percentage = (score_data["score"] / score_data["max_score"] * 100) if score_data["max_score"] > 0 else 0
-            
+
             if category_percentage >= 80:
                 cat_risk_level = "Low"
             elif category_percentage >= 60:
@@ -499,7 +525,7 @@ async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: A
                 cat_risk_level = "High"
             else:
                 cat_risk_level = "Critical"
-            
+
             category_scores_list.append(CategoryScore(
                 category_id=str(category.id),
                 category_title=category.title,
@@ -508,9 +534,9 @@ async def submit_shared_assessment(submission: SharedAssessmentSubmission, db: A
                 percentage=category_percentage,
                 risk_level=cat_risk_level
             ))
-    
+
     await db.commit()
-    
+
     return AssessmentResult(
         assessment_id=new_assessment.id,
         user_profile_id=new_assessment.user_profile_id,
@@ -534,10 +560,10 @@ async def get_assessment_result(assessment_id: UUID, db: Annotated[AsyncSession,
     assessment = result.scalar_one_or_none()
     if not assessment:
         raise HTTPException(status_code=404, detail="Assessment not found")
-    
+
     if assessment.status != "completed":
         raise HTTPException(status_code=400, detail="Assessment not completed yet")
-    
+
     # Rebuild category scores for response
     category_scores_list = []
     if assessment.category_scores:
@@ -546,7 +572,7 @@ async def get_assessment_result(assessment_id: UUID, db: Annotated[AsyncSession,
             if category.id in assessment.category_scores:
                 cat_data = assessment.category_scores[category.id]
                 cat_percentage = (cat_data["score"] / cat_data["max_score"] * 100) if cat_data["max_score"] > 0 else 0
-                
+
                 if cat_percentage >= 80:
                     cat_risk = "low"
                 elif cat_percentage >= 60:
@@ -555,7 +581,7 @@ async def get_assessment_result(assessment_id: UUID, db: Annotated[AsyncSession,
                     cat_risk = "high"
                 else:
                     cat_risk = "critical"
-                
+
                 category_scores_list.append(CategoryScore(
                     category_id=category.id,
                     category_title=category.title,
@@ -564,7 +590,7 @@ async def get_assessment_result(assessment_id: UUID, db: Annotated[AsyncSession,
                     percentage=cat_percentage,
                     risk_level=cat_risk
                 ))
-    
+
     return AssessmentResult(
         assessment_id=assessment.id,
         user_id=assessment.user_id,
@@ -586,7 +612,7 @@ async def get_user_assessments(user_id: int, db: Annotated[AsyncSession, Depends
     """Get all assessments for a user."""
     assessments = await db.execute(select(Assessment).where(Assessment.user_id == user_id).order_by(Assessment.created_at.desc()))
     assessments = assessments.scalars().all()
-    
+
     return AssessmentList(
         assessments=[AssessmentResponse.from_orm(a) for a in assessments],
         total=len(assessments)

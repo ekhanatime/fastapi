@@ -1,0 +1,416 @@
+{
+  "id": "course_gdpr_social_email_cookies_v1_no",
+  "version": "1.1.0",
+  "org_id": "11111111-1111-1111-1111-111111111111",
+  "linkage": {
+    "course_id": "crs_gdpr_core_v1",
+    "module_id": "mod_01_gdpr_basics",
+    "assessment_set_id": "aset_gdpr_social_email_cookies_v1"
+  },
+  "meta": {
+    "title": "Kurs: GDPR, sosial manipulering, e-post og cookies (grunnkurs)",
+    "description": "Kort og praktisk vurdering med ekte hverdagsscenarier. Enkel å forstå, god for konvertering.",
+    "estimated_minutes": "8-12",
+    "language": "nb-NO",
+    "visibility": "public",
+    "tags": [
+      "course:gdpr",
+      "phishing",
+      "social-engineering",
+      "email",
+      "cookies"
+    ],
+    "category": "GDPR & Sikkerhet",
+    "difficulty": "Lett–Middels",
+    "audience": "Alle ansatte (spesielt ledelse, HR, salg, kundeservice og drift)",
+    "learning_objectives": [
+      "Forstå grunnleggende GDPR-prinsipper",
+      "Gjenkjenne sosial manipulering og phishing",
+      "Anvende trygg praksis for e-post",
+      "Forklare cookie-samtykke og nødvendighet"
+    ],
+    "regulatory_refs": [
+      {
+        "framework": "GDPR",
+        "article": "Art. 5, 6, 13-15",
+        "topic": null
+      },
+      {
+        "framework": "ePrivacy",
+        "article": null,
+        "topic": "Cookies/samtykke"
+      }
+    ]
+  },
+  "settings": {
+    "lead_magnet": true,
+    "collect_fields": [
+      "name",
+      "email",
+      "company"
+    ],
+    "shuffle_questions": true,
+    "shuffle_options": true,
+    "time_limit_minutes": null,
+    "allow_backtracking": true,
+    "show_explanations": "after_submission",
+    "max_attempts_per_user": 1,
+    "retake_cooldown_hours": 0,
+    "pass_threshold_percentage": 70,
+    "gate_rules": {
+      "require_video_completion_percent": 0,
+      "require_acknowledgement": false
+    }
+  },
+  "ux": {
+    "theme": "light",
+    "progress_bar": true,
+    "question_numbering": "per_section",
+    "accessibility": {
+      "wcag_level": "AA",
+      "caption_required": true,
+      "reading_grade_level": "B1"
+    },
+    "localization": {
+      "default_locale": "nb-NO",
+      "available_locales": [
+        "nb-NO",
+        "en-US"
+      ]
+    }
+  },
+  "security": {
+    "anti_cheat": {
+      "tab_switch_limit": 0,
+      "copy_paste_allowed": true,
+      "suspicious_ip_threshold": 5,
+      "allow_list_domains": []
+    },
+    "proctoring": {
+      "enabled": false,
+      "photo_check": false
+    },
+    "data_protection": {
+      "store_personal_fields_hashed": true,
+      "retain_personal_days": 365
+    }
+  },
+  "integrations": {
+    "webhooks": {
+      "on_pass": null,
+      "on_fail": null,
+      "on_completion": null
+    },
+    "lms": {
+      "scorm": false,
+      "xapi": true
+    },
+    "payments": {
+      "enabled": true,
+      "currency": "NOK",
+      "price_amount": 0,
+      "sku": "GDPR-LEAD-001",
+      "is_free": true
+    }
+  },
+  "categories": {
+    "gdpr": {
+      "title": "GDPR-grunnlag",
+      "description": "Formål, samtykke, dataminimering, rettigheter",
+      "icon": "fas fa-scale-balanced"
+    },
+    "social": {
+      "title": "Sosial manipulering",
+      "description": "Phishing, pretexting, CEO-fraud",
+      "icon": "fas fa-user-secret"
+    },
+    "email": {
+      "title": "E-post & vedlegg",
+      "description": "Lenker, vedlegg, verifisering",
+      "icon": "fas fa-envelope"
+    },
+    "cookies": {
+      "title": "Cookies & samtykke",
+      "description": "Banner, nødvendighet, analyse/markedsføring",
+      "icon": "fas fa-cookie-bite"
+    }
+  },
+  "sections": [
+    {
+      "key": "s1_gdpr",
+      "title": "GDPR",
+      "description": "Formål, samtykke og rettigheter",
+      "order": 1,
+      "gating": null
+    },
+    {
+      "key": "s2_social",
+      "title": "Sosial manipulering",
+      "description": "Unngå å bli lurt",
+      "order": 2,
+      "gating": null
+    },
+    {
+      "key": "s3_email",
+      "title": "E-post",
+      "description": "Trygg håndtering i hverdagen",
+      "order": 3,
+      "gating": null
+    },
+    {
+      "key": "s4_cookies",
+      "title": "Cookies",
+      "description": "Samtykke og valg",
+      "order": 4,
+      "gating": null
+    }
+  ],
+  "assets": {
+    "images": [],
+    "attachments": [],
+    "references": []
+  },
+  "questions": [
+    {
+      "id": 1,
+      "section": "s1_gdpr",
+      "category": "gdpr",
+      "text": "Du vil sende nyhetsbrev til potensielle kunder som legger igjen e-post. Hva trenger du?",
+      "type": "single",
+      "weight": 4,
+      "time_limit_sec": null,
+      "difficulty_tag": "medium",
+      "cognitive_level": "apply",
+      "options": [
+        {
+          "label": "Gyldig, frivillig og spesifikt samtykke før utsendelse",
+          "value": "consent_specific",
+          "correct": true
+        },
+        {
+          "label": "Skjult samtykke i personvernerklæringen",
+          "value": "consent_hidden",
+          "correct": false
+        },
+        {
+          "label": "At de besøkte nettsiden din én gang",
+          "value": "visit_once",
+          "correct": false
+        }
+      ],
+      "feedback": "Markedsføring via e-post til ikke-kunder krever vanligvis gyldig samtykke. Samtykket skal være informert, frivillig og spesifikt.",
+      "hints": [
+        "Tenk på kravene i artikkel 6 og ePrivacy for kommunikasjon."
+      ],
+      "tags": [
+        "consent",
+        "marketing"
+      ],
+      "stats": {
+        "views": 0,
+        "attempts": 0,
+        "correct_rate": null,
+        "avg_time_sec": null,
+        "discrimination_pb": null,
+        "top_distractors": []
+      }
+    }
+  ],
+  "scoring": {
+    "single": {
+      "correct": "weight",
+      "incorrect": 0
+    },
+    "multiple": {
+      "method": "partial_credit",
+      "credit": "weight * (correct_selected / num_correct)",
+      "penalty": "weight * 0.5 * (incorrect_selected / num_incorrect)",
+      "clamp": [
+        0,
+        "weight"
+      ]
+    },
+    "true_false": {
+      "correct": "weight",
+      "incorrect": 0
+    },
+    "short_answer": {
+      "method": "keyword_match",
+      "min_keywords_for_full": 2,
+      "case_sensitive": false
+    },
+    "normalization": {
+      "max_score": null,
+      "scale_to_percentage": true
+    }
+  },
+  "result_buckets": [
+    {
+      "min_percentage": 0,
+      "label": "Starter",
+      "description": "God start – bygg grunnmur: samtykke, verifisering og cookie-valg."
+    },
+    {
+      "min_percentage": 40,
+      "label": "Bronse",
+      "description": "På vei – forbedre rutiner for verifisering, sletting og opplæring."
+    },
+    {
+      "min_percentage": 65,
+      "label": "Sølv",
+      "description": "Solid – standardiser maler, øvelser og tekniske kontroller."
+    },
+    {
+      "min_percentage": 85,
+      "label": "Gull",
+      "description": "Modent – kontinuerlig måling, revisjon og forbedring i hele kjeden."
+    }
+  ],
+  "analytics_spec": {
+    "events": [
+      "assessment_started",
+      "section_entered",
+      "question_viewed",
+      "answer_selected",
+      "answer_changed",
+      "hint_opened",
+      "question_flagged",
+      "assessment_submitted",
+      "assessment_passed",
+      "assessment_failed",
+      "assessment_abandoned"
+    ],
+    "dimensions": [
+      "section",
+      "category",
+      "device_type",
+      "browser",
+      "locale",
+      "acquisition_source"
+    ],
+    "metrics": [
+      "completion_rate",
+      "pass_rate",
+      "avg_score_pct",
+      "median_time_min",
+      "avg_attempts_to_pass",
+      "abandonment_rate",
+      "bounce_time_sec",
+      "question_correct_rate",
+      "question_avg_time_sec",
+      "item_difficulty_p",
+      "item_discrimination_pb",
+      "category_accuracy",
+      "category_time_spent_sec",
+      "dropoff_per_question",
+      "hint_usage_rate",
+      "flag_rate",
+      "tab_switch_count",
+      "conversion_to_signup_rate",
+      "conversion_to_purchase_rate"
+    ]
+  },
+  "kpi_targets": {
+    "completion_rate_pct": 70,
+    "pass_rate_pct": 60,
+    "avg_score_pct": 75,
+    "median_time_min": 10,
+    "abandonment_rate_pct": 15,
+    "avg_attempts_to_pass": 1.2,
+    "category_min_accuracy_pct": {
+      "gdpr": 60,
+      "social": 60,
+      "email": 60,
+      "cookies": 60
+    }
+  },
+  "computed_kpis": {
+    "time_window": {
+      "from": null,
+      "to": null
+    },
+    "overall": {
+      "starts": 0,
+      "completions": 0,
+      "completion_rate_pct": null,
+      "passes": 0,
+      "pass_rate_pct": null,
+      "avg_score_pct": null,
+      "median_time_min": null,
+      "avg_attempts_to_pass": null,
+      "abandonment_rate_pct": null,
+      "bounce_time_sec": null,
+      "reliability_kr20": null
+    },
+    "by_category": {
+      "gdpr": {
+        "accuracy_pct": null,
+        "avg_time_sec": null,
+        "attempts": 0
+      },
+      "social": {
+        "accuracy_pct": null,
+        "avg_time_sec": null,
+        "attempts": 0
+      },
+      "email": {
+        "accuracy_pct": null,
+        "avg_time_sec": null,
+        "attempts": 0
+      },
+      "cookies": {
+        "accuracy_pct": null,
+        "avg_time_sec": null,
+        "attempts": 0
+      }
+    },
+    "by_section": {
+      "s1_gdpr": {
+        "dropoff_pct": null,
+        "avg_time_sec": null
+      },
+      "s2_social": {
+        "dropoff_pct": null,
+        "avg_time_sec": null
+      },
+      "s3_email": {
+        "dropoff_pct": null,
+        "avg_time_sec": null
+      },
+      "s4_cookies": {
+        "dropoff_pct": null,
+        "avg_time_sec": null
+      }
+    },
+    "top_error_patterns": [
+      {
+        "question_id": null,
+        "common_wrong_option_value": null,
+        "rate_pct": null
+      }
+    ],
+    "device_locale_splits": {
+      "by_device": {
+        "desktop": 0,
+        "mobile": 0,
+        "tablet": 0
+      },
+      "by_locale": {
+        "nb-NO": 0,
+        "en-US": 0
+      }
+    }
+  },
+  "audit": {
+    "created_by": "admin_ekhana",
+    "created_at": "2025-09-23T10:00:00Z",
+    "updated_at": "2025-09-23T10:00:00Z",
+    "changelog": [
+      {
+        "version": "1.1.0",
+        "date": "2025-09-23T10:00:00Z",
+        "notes": "Added KPIs, security, UX, integrations, i18n."
+      }
+    ]
+  }
+}

@@ -102,6 +102,8 @@ Lead/User → Start Assessment → Answer Questions → Submit → Get Results
 - `GET /api/v1/assessment-data/full` (loads questions)
 - `POST /api/v1/assessments/submit` (calculates scores, generates recommendations)
 - `GET /api/v1/assessments/{id}` (retrieves results)
+- `GET /api/v1/assessment/schema` (lists available template definitions)
+- `GET /api/v1/assessment/schema/{template_id}` (retrieves full template metadata)
 
 ### 3. **User Registration Flow** (Optional)
 ```
@@ -190,6 +192,9 @@ DEFAULT_ASSESSMENT_LIMIT=3
 PREMIUM_ASSESSMENT_LIMIT=50
 SHARE_TOKEN_LENGTH=32
 TEMP_PASSWORD_LENGTH=12
+
+# Supabase container defaults
+POSTGRES_SERVER=supabase-db
 ```
 
 ### Database Migration

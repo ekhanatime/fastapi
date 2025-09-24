@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.0] - 2025-09-24
+
+### Added
+
+- **Assessment Template Registry**: Bundled GDPR/social engineering course template exposed through Pydantic schemas and new `/api/v1/assessment/schema` endpoints.
+- **Template SPOT Documentation**: Introduced `docs/SPOT_Assessments.md` linking code, data, and API touchpoints for assessment templates.
+- **Automated Tests**: Added coverage ensuring template listings, detail retrieval, and error handling behave as expected.
+
+### Changed
+
+- **Container Stack**: Replaced the plain Postgres service with a Supabase Postgres container to align with production infrastructure plans.
+- **Template Registry Layout**: Moved bundled definitions into `app/assessment_templates` JSON resources loaded through a typed registry for clarity and reuse.
+- **Developer Documentation**: Updated guides and README to surface the template schema endpoints and Supabase connection details.
+
+### Fixed
+
+- Ensured template serialization preserves JSON field aliases (e.g., `time_window.from`) via central schema validation.
+
+---
+
 ## [3.0.0] - 2025-07-14
 
 ### Added
