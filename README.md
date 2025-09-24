@@ -103,6 +103,8 @@ const assessmentHistory = await getAssessmentHistory(token);
 - `POST /api/v1/lead-capture/capture-lead` - Create user account
 - `POST /api/v1/assessment/start` - Start new assessment
 - `GET /api/v1/assessment/data/full` - Load questions
+- `GET /api/v1/assessment/schema` - List bundled assessment templates
+- `GET /api/v1/assessment/schema/{template_id}` - Retrieve full template definition
 
 ### Protected Endpoints (Authentication Required)
 - `POST /api/v1/assessment/submit` - Submit assessment answers

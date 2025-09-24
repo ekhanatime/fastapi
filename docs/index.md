@@ -107,6 +107,7 @@ That's it! Your API will be available at `http://localhost:8000/docs`
 - **[Development](user-guide/development.md)** - Extending and customizing the boilerplate
 - **[Testing](user-guide/testing.md)** - Testing strategies and best practices
 - **[Production](user-guide/production.md)** - Production deployment guides
+- **[Assessment Template SPOT](SPOT_Assessments.md)** - Canonical schema + infrastructure notes
 
 ## Perfect For
 

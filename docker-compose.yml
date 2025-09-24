@@ -14,7 +14,7 @@ services:
     # expose:
     #   - "8000"
     depends_on:
-      db:
+      supabase-db:
         condition: service_healthy
       redis:
         condition: service_started
@@ -30,7 +30,7 @@ services:
     env_file:
       - ./src/.env
     depends_on:
-      db:
+      supabase-db:
         condition: service_healthy
       redis:
         condition: service_started
@@ -38,18 +38,21 @@ services:
       - ./src/app:/code/app
       - ./src/.env:/code/.env
 
-  db:
-    image: postgres:13
+  supabase-db:
+    image: supabase/postgres:15.1.1.65
     env_file:
       - ./src/.env
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: 5432
+      PGPORT: 5432
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - supabase-data:/var/lib/postgresql/data
       - ./seed_scripts:/docker-entrypoint-initdb.d
-    # -------- replace with comment to run migrations with docker --------
     expose:
       - "5432"
-    # ports:
-    #  - 5432:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -75,7 +78,7 @@ services:
   #   env_file:
   #     - ./src/.env
   #   depends_on:
-  #     - db
+  #     - supabase-db
 
   #-------- uncomment to run with nginx --------
   # nginx:
@@ -95,7 +98,7 @@ services:
   #   env_file:
   #     - ./src/.env
   #   depends_on:
-  #     - db
+  #     - supabase-db
   #     - web
   #   command: python -m src.scripts.create_first_superuser
   #   volumes:
@@ -109,13 +112,13 @@ services:
   #   env_file:
   #     - ./src/.env
   #   depends_on:
-  #     - db
+  #     - supabase-db
   #     - web
   #   command: python -m src.scripts.create_first_tier
   #   volumes:
   #     - ./src:/code/src
 
 volumes:
-  postgres-data:
+  supabase-data:
   redis-data:
   #pgadmin-data:

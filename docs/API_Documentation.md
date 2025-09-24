@@ -198,6 +198,12 @@ Get assessment results by ID.
 
 **Response:** Same as submit endpoint response
 
+#### GET `/api/v1/assessment/schema`
+List assessment templates that ship with the platform. Returns concise metadata (`id`, `title`, `version`, etc.).
+
+#### GET `/api/v1/assessment/schema/{template_id}`
+Retrieve the full assessment template definition, including scoring rules, KPIs, UX configuration, and analytics specification.
+
 **Features:**
 - Public access via share_token
 - Protected access for assessment owner
