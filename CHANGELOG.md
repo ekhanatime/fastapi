@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] - 2025-09-24
+### Added
+- Schema-validated score template registry with bundled `performance_health_v1` definition and FastAPI endpoints.
+- Automated score template tests covering registry usage and HTTP access.
+
+### Changed
+- Centralized SPOT documentation to include bundled templates and score templates.
+- API router registration now links in the score template router with governance metadata comments.
+- Added optional `DISABLE_REDIS_FOR_TESTS` and `DISABLE_DB_FOR_TESTS` flags so automated suites can bypass infrastructure services.
+
+### Fixed
+- Ensured tasklist/diagram governance artefacts exist for new functions.
+
+### Docs
+- Added score template function documentation, ERD assets, and schema overview with nb-NO localization.
+
 ## [3.1.0] - 2025-09-24
 
 ### Added

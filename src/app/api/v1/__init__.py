@@ -1,3 +1,4 @@
+# Docs: ./docs/functions/api_router_v1.md | SPOT: ./SPOT.md#function-catalog
 from fastapi import APIRouter
 
 from .login import router as login_router
@@ -17,6 +18,7 @@ from .leads import router as leads_router
 from .lead_capture import router as lead_capture_router
 from .password import router as password_router
 from .assessments import router as assessments_router
+from .score_templates import router as score_templates_router
 from .email import router as email_router
 
 # New comprehensive endpoints from migration file analysis
@@ -47,6 +49,7 @@ router.include_router(health_router, tags=["health"])
 
 # Assessment endpoints - accessible at /api/v1/assessment (singular to match API test console)
 router.include_router(assessments_router, prefix="/assessment", tags=["assessments"])
+router.include_router(score_templates_router)
 
 # Other endpoints with standard prefixes
 router.include_router(categories_router, prefix="/categories", tags=["categories"])

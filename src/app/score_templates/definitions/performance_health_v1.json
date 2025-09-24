@@ -1,0 +1,88 @@
+{
+  "st_meta": {
+    "key": "performance_health_v1",
+    "name": "Performance Health Score",
+    "schema_version": "1.0.0",
+    "scale": { "min": 0, "max": 100 },
+    "min_n": 5,
+    "public_policy": {
+      "allow_public": true,
+      "only_from": "trusted_partners",
+      "min_orgs": 3
+    }
+  },
+  "buckets": [
+    {
+      "code": "RED",
+      "label": "At Risk",
+      "color": "#F04438",
+      "range": { "min": 0, "max": 49.9 },
+      "actions": [
+        "Escalate to success manager",
+        "Send remediation playbook"
+      ],
+      "feedback": "Team requires immediate coaching and focused interventions."
+    },
+    {
+      "code": "YELLOW",
+      "label": "Monitoring",
+      "color": "#F7B519",
+      "range": { "min": 50, "max": 79.9 },
+      "actions": [
+        "Schedule follow-up workshop",
+        "Share targeted learning modules"
+      ],
+      "feedback": "Solid baseline. Concentrate on under-performing dimensions."
+    },
+    {
+      "code": "GREEN",
+      "label": "Thriving",
+      "color": "#12B76A",
+      "range": { "min": 80, "max": 100 },
+      "actions": [
+        "Highlight in leadership report"
+      ],
+      "feedback": "Consistently strong results across dimensions."
+    }
+  ],
+  "dimensions": [
+    {
+      "code": "REACH",
+      "name": "Audience Reach",
+      "weight": 0.4,
+      "items": ["touchpoints", "coverage", "engagement_rate"],
+      "transform": "avg*20",
+      "bucket_overrides": { "RED_MAX": 45, "YELLOW_MAX": 75 }
+    },
+    {
+      "code": "QUALITY",
+      "name": "Experience Quality",
+      "weight": 0.35,
+      "items": ["csat", "nps", "retention"],
+      "transform": "scale_1to5",
+      "bucket_overrides": { "RED_MAX": 50, "YELLOW_MAX": 80 }
+    },
+    {
+      "code": "AGILITY",
+      "name": "Operational Agility",
+      "weight": 0.25,
+      "items": ["release_velocity", "cycle_time"],
+      "transform": "custom",
+      "bucket_overrides": { "RED_MAX": 55, "YELLOW_MAX": 85 }
+    }
+  ],
+  "tips": {
+    "REACH": [
+      "Utvid distribusjonskanaler med segmenterte kampanjer.",
+      "Investér i datadrevne outreach-eksperimenter."
+    ],
+    "QUALITY": [
+      "Analyser tilbakemeldinger for å lukke friksjonspunkter.",
+      "Gi teamet repetisjonskurs i kundedialog."
+    ],
+    "AGILITY": [
+      "Innfør retrospektive møter hver sprint.",
+      "Automatiser deployment-testløp for raskere iterasjoner."
+    ]
+  }
+}
