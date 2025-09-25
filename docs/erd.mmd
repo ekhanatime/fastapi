@@ -1,5 +1,5 @@
 erDiagram
-    SCORE_TEMPLATE ||--o{ SCORE_BUCKET : "qualifies"
-    SCORE_TEMPLATE ||--o{ SCORE_DIMENSION : "weights"
-    SCORE_DIMENSION ||--o{ SCORE_ITEM : "covers"
-    SCORE_TEMPLATE }o--|| SCORE_SCALE : "uses"
+    ASSESSMENT_VERSIONS ||--o{ ASSESSMENT_ITEM_BANK : "contains"
+    ASSESSMENT_ITEM_BANK ||--|| ASSESSMENT_ITEM_STATS : "tracks"
+    ASSESSMENTS ||--o{ ASSESSMENT_RESPONSE_ITEMS : "records"
+    ASSESSMENT_ITEM_BANK ||--o{ ASSESSMENT_RESPONSE_ITEMS : "delivers"

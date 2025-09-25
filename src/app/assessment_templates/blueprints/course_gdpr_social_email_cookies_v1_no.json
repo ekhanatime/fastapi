@@ -1,0 +1,375 @@
+{
+    "template_id": "course_gdpr_social_email_cookies_v1_no",
+    "blueprint_name": "Safety Culture & Leadership Form A",
+    "version": "2025-09-24",
+    "anchors": 2,
+    "dimensions": {
+        "SAFETY": {
+            "easy": 2,
+            "medium": 4,
+            "hard": 2,
+            "anchors": 1,
+            "critical_items": [
+                "safety_anchor_ppe",
+                "safety_hard_confined"
+            ]
+        },
+        "CULTURE": {
+            "easy": 1,
+            "medium": 4,
+            "hard": 1,
+            "anchors": 1,
+            "critical_items": [
+                "culture_anchor_voice"
+            ]
+        },
+        "LEADERSHIP": {
+            "easy": 1,
+            "medium": 4,
+            "hard": 1,
+            "anchors": 0,
+            "critical_items": [
+                "leadership_hard_accountability"
+            ]
+        }
+    },
+    "anchor_items": [
+        {
+            "code": "safety_anchor_ppe",
+            "dimension": "SAFETY",
+            "difficulty": "medium"
+        },
+        {
+            "code": "culture_anchor_voice",
+            "dimension": "CULTURE",
+            "difficulty": "medium"
+        }
+    ],
+    "difficulty_weights": {
+        "easy": 1.0,
+        "medium": 1.2,
+        "hard": 1.5
+    },
+    "exposure": {
+        "default_cap": 0.25,
+        "min_weight": 0.05
+    },
+    "critical": {
+        "items": [
+            "safety_anchor_ppe",
+            "safety_hard_confined",
+            "culture_anchor_voice"
+        ],
+        "dimensions": {
+            "SAFETY": {
+                "mode": "knockout",
+                "threshold": 0.5,
+                "weight_multiplier": 3.0
+            },
+            "CULTURE": {
+                "mode": "weighted",
+                "threshold": 0.6,
+                "weight_multiplier": 3.0
+            },
+            "LEADERSHIP": {
+                "mode": "weighted",
+                "threshold": 0.6,
+                "weight_multiplier": 2.5
+            }
+        }
+    },
+    "scoring": {
+        "dimensions": [
+            {
+                "code": "SAFETY",
+                "weight": 0.4,
+                "critical_knockout": true,
+                "critical_threshold": 0.5,
+                "item_weight_mode": "use_item_weight",
+                "critical_weight_multiplier": 3.0
+            },
+            {
+                "code": "CULTURE",
+                "weight": 0.3,
+                "critical_knockout": false,
+                "critical_threshold": 0.5,
+                "item_weight_mode": "use_item_weight",
+                "critical_weight_multiplier": 3.0
+            },
+            {
+                "code": "LEADERSHIP",
+                "weight": 0.3,
+                "critical_knockout": false,
+                "critical_threshold": 0.5,
+                "item_weight_mode": "use_item_weight",
+                "critical_weight_multiplier": 2.5
+            }
+        ],
+        "buckets": [
+            {
+                "code": "GREEN",
+                "min": 80
+            },
+            {
+                "code": "YELLOW",
+                "min": 65
+            },
+            {
+                "code": "ORANGE",
+                "min": 45
+            },
+            {
+                "code": "RED",
+                "min": 0
+            }
+        ],
+        "overall_knockout_bucket": "RED"
+    },
+    "sample_pool": [
+        {
+            "code": "safety_anchor_ppe",
+            "dimension": "SAFETY",
+            "difficulty": "medium",
+            "weight": 4.0,
+            "anchor": true,
+            "critical": true,
+            "discrimination": 0.42,
+            "exposure_ratio": 0.12,
+            "tags": [
+                "PPE",
+                "anchor"
+            ]
+        },
+        {
+            "code": "safety_medium_incident_reporting",
+            "dimension": "SAFETY",
+            "difficulty": "medium",
+            "weight": 3.5,
+            "critical": true,
+            "discrimination": 0.38,
+            "exposure_ratio": 0.18,
+            "tags": [
+                "incident",
+                "reporting"
+            ]
+        },
+        {
+            "code": "safety_medium_toolbox_talks",
+            "dimension": "SAFETY",
+            "difficulty": "medium",
+            "weight": 3.0,
+            "discrimination": 0.25,
+            "exposure_ratio": 0.05,
+            "tags": [
+                "culture",
+                "communication"
+            ]
+        },
+        {
+            "code": "safety_medium_shift_handover",
+            "dimension": "SAFETY",
+            "difficulty": "medium",
+            "weight": 3.2,
+            "discrimination": 0.3,
+            "exposure_ratio": 0.21,
+            "tags": [
+                "handover"
+            ]
+        },
+        {
+            "code": "safety_easy_intro_rules",
+            "dimension": "SAFETY",
+            "difficulty": "easy",
+            "weight": 2.0,
+            "discrimination": 0.22,
+            "exposure_ratio": 0.08,
+            "tags": [
+                "onboarding"
+            ]
+        },
+        {
+            "code": "safety_easy_microlearning",
+            "dimension": "SAFETY",
+            "difficulty": "easy",
+            "weight": 2.2,
+            "discrimination": 0.19,
+            "exposure_ratio": 0.09,
+            "tags": [
+                "training"
+            ]
+        },
+        {
+            "code": "safety_hard_confined",
+            "dimension": "SAFETY",
+            "difficulty": "hard",
+            "weight": 4.5,
+            "critical": true,
+            "discrimination": 0.5,
+            "exposure_ratio": 0.24,
+            "tags": [
+                "confined",
+                "space"
+            ]
+        },
+        {
+            "code": "safety_hard_electrical",
+            "dimension": "SAFETY",
+            "difficulty": "hard",
+            "weight": 4.3,
+            "discrimination": 0.41,
+            "exposure_ratio": 0.2,
+            "tags": [
+                "lockout",
+                "tagout"
+            ]
+        },
+        {
+            "code": "culture_anchor_voice",
+            "dimension": "CULTURE",
+            "difficulty": "medium",
+            "weight": 3.3,
+            "anchor": true,
+            "critical": true,
+            "discrimination": 0.36,
+            "exposure_ratio": 0.14,
+            "tags": [
+                "speakup",
+                "anchor"
+            ]
+        },
+        {
+            "code": "culture_medium_peer_feedback",
+            "dimension": "CULTURE",
+            "difficulty": "medium",
+            "weight": 3.1,
+            "discrimination": 0.28,
+            "exposure_ratio": 0.17,
+            "tags": [
+                "feedback"
+            ]
+        },
+        {
+            "code": "culture_medium_learning_loops",
+            "dimension": "CULTURE",
+            "difficulty": "medium",
+            "weight": 3.0,
+            "discrimination": 0.26,
+            "exposure_ratio": 0.11,
+            "tags": [
+                "learning"
+            ]
+        },
+        {
+            "code": "culture_medium_conflict_resolution",
+            "dimension": "CULTURE",
+            "difficulty": "medium",
+            "weight": 3.4,
+            "discrimination": 0.3,
+            "exposure_ratio": 0.23,
+            "tags": [
+                "conflict"
+            ]
+        },
+        {
+            "code": "culture_medium_values_activation",
+            "dimension": "CULTURE",
+            "difficulty": "medium",
+            "weight": 3.2,
+            "discrimination": 0.27,
+            "exposure_ratio": 0.2,
+            "tags": [
+                "values"
+            ]
+        },
+        {
+            "code": "culture_easy_rituals",
+            "dimension": "CULTURE",
+            "difficulty": "easy",
+            "weight": 2.4,
+            "discrimination": 0.21,
+            "exposure_ratio": 0.1,
+            "tags": [
+                "rituals"
+            ]
+        },
+        {
+            "code": "culture_hard_retention",
+            "dimension": "CULTURE",
+            "difficulty": "hard",
+            "weight": 4.0,
+            "critical": true,
+            "discrimination": 0.4,
+            "exposure_ratio": 0.19,
+            "tags": [
+                "retention"
+            ]
+        },
+        {
+            "code": "leadership_easy_checkins",
+            "dimension": "LEADERSHIP",
+            "difficulty": "easy",
+            "weight": 2.5,
+            "discrimination": 0.2,
+            "exposure_ratio": 0.07,
+            "tags": [
+                "checkins"
+            ]
+        },
+        {
+            "code": "leadership_medium_coaching",
+            "dimension": "LEADERSHIP",
+            "difficulty": "medium",
+            "weight": 3.4,
+            "discrimination": 0.32,
+            "exposure_ratio": 0.16,
+            "tags": [
+                "coaching"
+            ]
+        },
+        {
+            "code": "leadership_medium_vision",
+            "dimension": "LEADERSHIP",
+            "difficulty": "medium",
+            "weight": 3.3,
+            "discrimination": 0.29,
+            "exposure_ratio": 0.15,
+            "tags": [
+                "vision"
+            ]
+        },
+        {
+            "code": "leadership_medium_resources",
+            "dimension": "LEADERSHIP",
+            "difficulty": "medium",
+            "weight": 3.5,
+            "discrimination": 0.31,
+            "exposure_ratio": 0.18,
+            "tags": [
+                "resources"
+            ]
+        },
+        {
+            "code": "leadership_medium_retros",
+            "dimension": "LEADERSHIP",
+            "difficulty": "medium",
+            "weight": 3.2,
+            "discrimination": 0.24,
+            "exposure_ratio": 0.2,
+            "tags": [
+                "retrospective"
+            ]
+        },
+        {
+            "code": "leadership_hard_accountability",
+            "dimension": "LEADERSHIP",
+            "difficulty": "hard",
+            "weight": 4.1,
+            "critical": true,
+            "discrimination": 0.37,
+            "exposure_ratio": 0.22,
+            "tags": [
+                "accountability"
+            ]
+        }
+    ]
+}

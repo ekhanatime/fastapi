@@ -1,16 +1,23 @@
+"""Docs: ./docs/functions/assessment_blueprint_engine.md | SPOT: ./SPOT.md#function-catalog"""
 import secrets
 import uuid
 from datetime import datetime
 from typing import Annotated, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user
 
 from ...core.db.database import async_get_db
+from ...assessment_engine import (
+    BlueprintLoadError,
+    generate_selection_preview,
+    list_blueprint_ids,
+    load_blueprint_document,
+)
 from ...assessment_templates import (
     get_assessment_template,
     list_assessment_templates,
@@ -33,8 +40,69 @@ from ...schemas.assessment_template import (
     AssessmentDefinition,
     AssessmentTemplateSummary,
 )
+from ...schemas.assessment_blueprint import (
+    BlueprintPreviewItem,
+    BlueprintPreviewResponse,
+    BlueprintSummary,
+)
 
 router = APIRouter()
+
+
+
+
+@router.get("/blueprint", response_model=list[BlueprintSummary])
+async def list_blueprint_documents() -> list[BlueprintSummary]:
+    """Expose available assessment blueprints with quota metadata."""
+
+    summaries: list[BlueprintSummary] = []
+    for blueprint_id in list_blueprint_ids():
+        try:
+            document = load_blueprint_document(blueprint_id)
+        except BlueprintLoadError as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+        summaries.append(
+            BlueprintSummary(
+                template_id=document.template_id,
+                blueprint_name=document.blueprint_name,
+                version=document.version,
+                anchors=document.anchors,
+                total_quota=document.total_quota,
+            )
+        )
+    return summaries
+
+
+@router.get("/blueprint/{template_id}/preview", response_model=BlueprintPreviewResponse)
+async def preview_blueprint_selection(template_id: str, seed: int | None = Query(default=None, ge=0)) -> BlueprintPreviewResponse:
+    """Return a deterministic preview for stratified selection per blueprint."""
+
+    try:
+        preview = generate_selection_preview(template_id, seed)
+        document = load_blueprint_document(template_id)
+    except BlueprintLoadError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=500, detail=f"Failed to prepare blueprint preview: {exc}") from exc
+
+    template_summary = None
+    if preview.get("template"):
+        template_summary = AssessmentTemplateSummary(**preview["template"])
+
+    blueprint_summary = BlueprintSummary(
+        template_id=document.template_id,
+        blueprint_name=document.blueprint_name,
+        version=document.version,
+        anchors=document.anchors,
+        total_quota=document.total_quota,
+    )
+    items = [BlueprintPreviewItem.model_validate(item) for item in preview.get("selected_items", [])]
+
+    return BlueprintPreviewResponse(
+        template=template_summary.model_dump() if template_summary else None,
+        blueprint=blueprint_summary,
+        items=items,
+    )
 
 
 @router.get("/schema", response_model=list[AssessmentTemplateSummary])
