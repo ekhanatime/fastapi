@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Schema-validated score template registry with bundled `performance_health_v1` definition and FastAPI endpoints.
 - Automated score template tests covering registry usage and HTTP access.
+- Adaptive blueprint engine with stratified selection, knockout-aware scoring, preview endpoints, and bundled sample pool.
+- Assessment version catalog with item bank, response linkage, and exposure stats models plus seed script.
 
 ### Changed
 - Centralized SPOT documentation to include bundled templates and score templates.
@@ -22,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Docs
 - Added score template function documentation, ERD assets, and schema overview with nb-NO localization.
+- Added blueprint engine function documentation, SPOT updates, ERD refresh, and localization alignment.
+- Documented item bank models, refreshed schema diagrams, and updated SPOT/tasklist references.
 
 ## [3.1.0] - 2025-09-24
 

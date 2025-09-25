@@ -11,3 +11,7 @@
 - [x] Verify diagrams exist for `api_router_v1` (Diagrams section)
 - [x] Update docs & SPOT for `core_setup`; CHANGELOG [Unreleased]
 - [x] Verify diagrams exist for `core_setup` (Diagrams section)
+- [x] Update docs & SPOT for `assessment_blueprint_engine`; CHANGELOG [Unreleased]
+- [x] Verify diagrams exist for `assessment_blueprint_engine` (Diagrams section)
+- [x] Update docs & SPOT for `assessment_item_bank_models`; CHANGELOG [Unreleased]
+- [x] Verify diagrams exist for `assessment_item_bank_models` (Diagrams section)

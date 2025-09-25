@@ -10,10 +10,23 @@
 - [x] Expose score template summaries and definitions through FastAPI endpoints and automated tests.
 - [x] Update documentation set (function docs, tasklist, ERD, localization) and changelog for the new score template feature.
 
+## Integration Plan – Adaptive Blueprint Selection
+- [x] Add blueprint schema resources with anchors, quotas, and scoring metadata.
+- [x] Implement stratified selector + scoring engine with exposure handling tests.
+- [x] Publish blueprint preview API endpoints and automated coverage.
+- [x] Refresh documentation (function doc, SPOT, ERD, localization) and changelog entries.
+
+## Integration Plan – Assessment Item Bank Tracking
+- [x] Model persistent assessment versions, item bank entries, response linkage, and exposure statistics.
+- [x] Seed Postgres schema for the new tables with constraints and indexes.
+- [x] Extend blueprint engine utilities to hydrate pools from item bank records and stats.
+- [x] Update documentation set (function doc, SPOT, ERD, changelog, localization, tasklist).
+
 ## Function Catalog
 
 ### Backend (Python/FastAPI)
 - <i class="fas fa-clipboard-check"></i> **Assessment Template Registry** — Bundled template loader & API. _(Function doc pending migration; tracked in integration plan.)_
+- <i class="fas fa-layer-group"></i> **Assessment Blueprint Engine** — Stratified item blueprint loader, selector, scoring, and preview API. → `./docs/functions/assessment_blueprint_engine.md`
 - <i class="fas fa-chart-gauge"></i> **Score Template Registry** — Schema-validated score template loader with FastAPI exposure. → `./docs/functions/score_template_registry.md`
 - <i class="fas fa-network-wired"></i> **API Router v1** — Aggregates versioned public/admin routers. → `./docs/functions/api_router_v1.md`
 - <i class="fas fa-cogs"></i> **Core Setup & Lifespan** — FastAPI factory & Redis pool orchestration with test bypass flag. → `./docs/functions/core_setup.md`
@@ -32,6 +45,7 @@
 - Existing Vuexy-based assets (see `docs/index.md`) pending catalog alignment.
 
 ### Database (PostgreSQL)
+- <i class="fas fa-database"></i> **Assessment Item Bank Models** — Persistent item bank, response items, and exposure stats backing adaptive selection. → `./docs/functions/assessment_item_bank_models.md`
 - Core assessment schema coverage documented in `docs/Database/database_info.md`.
 
 ### Infra/Provisioning

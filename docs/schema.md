@@ -5,9 +5,9 @@ lastUpdated: 2025-09-24
 
 # Data Model Overview
 
-**en:** Simplified entity diagram for score templates and related concepts.
+**en:** Conceptual view of assessment versions, item bank governance, response linkage, and exposure statistics.
 
-**nb-NO:** Forenklet enhetsdiagram for skårmaler og tilhørende begreper.
+**nb-NO:** Konseptuelt diagram over vurderingsversjoner, spørsmålsbank-styring, responskobling og eksponeringsstatistikk.
 
 ![ERD](../public/erd.svg)
 
@@ -16,10 +16,10 @@ lastUpdated: 2025-09-24
 
 ```mermaid
 erDiagram
-    SCORE_TEMPLATE ||--o{ SCORE_BUCKET : "qualifies"
-    SCORE_TEMPLATE ||--o{ SCORE_DIMENSION : "weights"
-    SCORE_DIMENSION ||--o{ SCORE_ITEM : "covers"
-    SCORE_TEMPLATE }o--|| SCORE_SCALE : "uses"
+    ASSESSMENT_VERSIONS ||--o{ ASSESSMENT_ITEM_BANK : "contains"
+    ASSESSMENT_ITEM_BANK ||--|| ASSESSMENT_ITEM_STATS : "tracks"
+    ASSESSMENTS ||--o{ ASSESSMENT_RESPONSE_ITEMS : "records"
+    ASSESSMENT_ITEM_BANK ||--o{ ASSESSMENT_RESPONSE_ITEMS : "delivers"
 ```
 
 </details>
